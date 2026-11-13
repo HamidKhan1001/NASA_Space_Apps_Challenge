@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="description" content="An illustrative crop-rotation and field conditions dashboard for resilient agriculture.">
+  <title>Fieldnotes | NASA Space Apps Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f3ed;
+      --surface: #fffefa;
+      --ink: #202b25;
+      --muted: #788078;
+      --line: #e5e5dc;
+      --green: #245c45;
+      --green-dark: #193f32;
+      --lime: #d3e773;
+      --blue: #477a91;
+      --blue-pale: #e7f0f2;
+      --rust: #b65b3b;
+      --serif: "Newsreader", Georgia, serif;
+      --sans: "DM Sans", sans-serif;
+      --mono: "DM Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 14px; }
+    button, select, input { font: inherit; }
+    button, select { color: inherit; }
+    .shell { max-width: 1440px; margin: auto; min-height: 100vh; display: grid; grid-template-columns: 220px minmax(0, 1fr); }
+    aside { padding: 28px 18px 22px 26px; border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 100vh; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 7px; color: var(--green-dark); font-weight: 700; font-size: 16px; letter-spacing: 0; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; background: var(--green); color: var(--lime); border-radius: 50%; }
+    .brand-mark svg { width: 18px; height: 18px; }
+    .side-label { margin: 43px 8px 11px; color: #92978d; font: 10px var(--mono); letter-spacing: 0; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button { width: 100%; text-align: left; border: 0; border-radius: 5px; padding: 11px 10px; background: transparent; color: #626c63; display: flex; gap: 11px; align-items: center; cursor: pointer; }
+    .nav button.active { background: #e7eadd; color: var(--green-dark); font-weight: 600; }
+    .nav svg { width: 17px; height: 17px; flex: none; }
+    .aside-bottom { margin-top: auto; }
+    .station { background: var(--green-dark); color: #f4f2e7; padding: 15px; border-radius: 5px; }
+    .station small { display: block; color: #b3c9b6; font: 10px var(--mono); text-transform: uppercase; }
+    .station strong { display: block; margin-top: 8px; font-size: 14px; }
+    .station p { color: #c4d2c4; font-size: 11px; margin: 5px 0 0; }
+    .station-dot { display: inline-block; width: 7px; height: 7px; margin-right: 5px; border-radius: 50%; background: var(--lime); }
+    main { min-width: 0; padding: 0 42px 44px; }
+    .topbar { height: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .breadcrumb { font-size: 12px; color: var(--muted); }
+    .breadcrumb b { color: var(--ink); font-weight: 600; }
+    .top-right { display: flex; align-items: center; gap: 17px; color: var(--muted); font-size: 12px; }
+    .avatar { width: 30px; height: 30px; display: grid; place-items: center; background: #e2e8d2; color: var(--green-dark); border-radius: 50%; font-weight: 700; }
+    .content { max-width: 1120px; margin: 0 auto; }
+    .heading { padding: 35px 0 24px; display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+    .eyebrow { color: var(--green); font: 10px var(--mono); text-transform: uppercase; }
+    h1 { margin: 8px 0 4px; font: 500 35px/1.05 var(--serif); letter-spacing: 0; }
+    .subheading { color: var(--muted); margin: 8px 0 0; font-size: 13px; }
+    .date-pill { white-space: nowrap; padding: 9px 12px; border: 1px solid var(--line); border-radius: 4px; color: #626c63; font: 10px var(--mono); }
+    .status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; font: 10px var(--mono); color: #757c72; }
+    .status-badge { border-radius: 3px; padding: 5px 7px; background: #f2e8cf; color: #725b24; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); background: var(--surface); }
+    .metric { padding: 17px 18px 15px; min-width: 0; }
+    .metric + .metric { border-left: 1px solid var(--line); }
+    .metric-label { color: var(--muted); font-size: 11px; display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+    .metric-value { margin-top: 12px; font: 500 27px/1 var(--serif); }
+    .metric-value small { font: 11px var(--sans); color: var(--muted); }
+    .metric-foot { margin-top: 8px; color: var(--green); font-size: 10px; }
+    .metric-foot.neutral { color: var(--muted); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(275px, .9fr); gap: 16px; margin-top: 16px; }
+    .panel { min-width: 0; border: 1px solid var(--line); background: var(--surface); }
+    .panel-head { padding: 16px 18px 13px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    h2 { margin: 0; font: 600 17px var(--serif); letter-spacing: 0; }
+    .panel-kicker { color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .small-select { max-width: 145px; padding: 7px 25px 7px 9px; border: 1px solid var(--line); background: var(--surface); border-radius: 3px; font-size: 11px; }
+    .chart-wrap { padding: 15px 18px 7px; }
+    .chart-legend { display: flex; gap: 15px; color: var(--muted); font-size: 10px; }
+    .legend-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; background: var(--blue); }
+    .legend-dot.rain { background: #b8d2d6; }
+    .chart { width: 100%; height: auto; display: block; margin-top: 9px; }
+    .chart text { font-family: var(--mono); font-size: 9px; fill: #8a9088; }
+    .chart .grid { stroke: #ecece5; stroke-width: 1; }
+    .chart .rain-bar { fill: #d6e5e7; }
+    .chart .soil-line { fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .chart .soil-dot { fill: var(--surface); stroke: var(--blue); stroke-width: 2; }
+    .chart-note { border-top: 1px solid var(--line); padding: 11px 18px; color: var(--muted); font-size: 10px; }
+    .chart-note b { color: var(--ink); font-weight: 600; }
+    .rotation-body { padding: 14px 17px 16px; }
+    .crop-row { display: grid; grid-template-columns: 26px 1fr auto; gap: 9px; align-items: center; padding: 9px 0; border-bottom: 1px solid #eeeee8; }
+    .crop-icon { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 4px; background: #edf0e3; color: var(--green); font-size: 13px; }
+    .crop-name { font-size: 12px; font-weight: 600; }
+    .crop-desc { color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .crop-score { color: var(--green); font: 11px var(--mono); }
+    .rotation-foot { padding-top: 13px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .rotation-foot span { color: var(--muted); font-size: 10px; }
+    .rotation-foot strong { color: var(--green); font: 11px var(--mono); }
+    .bottom-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-top: 16px; }
+    .field-photo { min-height: 176px; position: relative; overflow: hidden; background: #78906c; }
+    .field-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(.75); }
+    .photo-shade { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(20,40,30,.76), transparent 70%); }
+    .photo-caption { position: absolute; bottom: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: end; color: white; gap: 12px; }
+    .photo-caption small { display: block; font: 9px var(--mono); color: #e0e9d7; text-transform: uppercase; }
+    .photo-caption strong { display: block; margin-top: 4px; font: 500 18px var(--serif); }
+    .photo-caption span { font: 9px var(--mono); color: #e0e9d7; text-align: right; }
+    .controls { padding: 16px 18px; }
+    .control-row + .control-row { margin-top: 13px; }
+    .control-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; font-size: 11px; }
+    .control-head label { color: #5e675f; }
+    .control-head output { color: var(--green); font: 11px var(--mono); }
+    input[type="range"] { display: block; width: 100%; height: 4px; accent-color: var(--green); cursor: pointer; }
+    .recommendation { padding: 12px 13px; margin-top: 16px; background: #edf1e4; border-left: 3px solid var(--green); }
+    .recommendation small { color: var(--green); font: 9px var(--mono); text-transform: uppercase; }
+    .recommendation p { margin: 5px 0 0; font-size: 11px; line-height: 1.5; color: #45554a; }
+    footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 19px; color: #858b82; font: 9px var(--mono); }
+    @media (max-width: 950px) {
+      .shell { grid-template-columns: 64px minmax(0, 1fr); }
+      aside { padding: 22px 10px; align-items: center; }
+      .brand { padding: 0; }
+      .brand-name, .side-label, .nav-label, .station { display: none; }
+      .nav { margin-top: 36px; }
+      .nav button { justify-content: center; padding: 11px 9px; }
+      .nav svg { width: 19px; height: 19px; }
+      main { padding: 0 25px 34px; }
+    }
+    @media (max-width: 680px) {
+      .shell { display: block; }
+      aside { min-height: auto; height: 56px; padding: 0 17px; border-right: 0; border-bottom: 1px solid var(--line); flex-direction: row; justify-content: space-between; }
+      .brand-name { display: inline; }
+      .nav { display: flex; margin: 0; gap: 3px; }
+      .nav button { padding: 8px; }
+      .nav button:not(.active) { display: none; }
+      .aside-bottom { display: none; }
+      main { padding: 0 16px 28px; }
+      .topbar { height: 52px; }
+      .top-right { gap: 8px; }
+      .heading { padding: 28px 0 18px; align-items: start; }
+      h1 { font-size: 30px; }
+      .date-pill { display: none; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .metric { padding: 13px; }
+      .metric:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+      .metric:nth-child(4) { border-top: 1px solid var(--line); }
+      .metric-value { font-size: 24px; }
+      .layout, .bottom-grid { grid-template-columns: 1fr; }
+      .panel-head { padding-left: 14px; padding-right: 14px; }
+      .chart-wrap { padding-left: 12px; padding-right: 12px; }
+      .chart-note { padding-left: 14px; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .content { animation: enter .45s ease-out both; }
+      @keyframes enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside aria-label="Main navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 19c0-5.2 2.7-9.2 7-12-1.1 5.3-3.3 9.5-7 12Zm0 0c-.5-4.1-2.7-7.3-7-9 1 4.7 3.3 7.7 7 9Zm0 0v-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="5" r="1.2" fill="currentColor"/></svg></span>
+        <span class="brand-name">fieldnotes</span>
+      </div>
+      <div class="side-label">Workspace</div>
+      <nav class="nav">
+        <button class="active" aria-current="page" title="Overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="11" width="7" height="10" rx="1"/><rect x="3" y="14" width="8" height="7" rx="1"/></svg><span class="nav-label">Overview</span></button>
+        <button title="Field conditions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17c3-8 6 8 9 0s6 8 9 0M3 10c3-8 6 8 9 0s6 8 9 0"/></svg><span class="nav-label">Field conditions</span></button>
+        <button title="Crop rotations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a7 7 0 0 1 11.6-2L20 12M4 12l2.3 5a7 7 0 0 0 11.6-2"/></svg><span class="nav-label">Crop rotations</span></button>
+      </nav>
+      <div class="aside-bottom">
+        <div class="station"><small><span class="station-dot"></span>Study area</small><strong>Peshawar Valley</strong><p>Khyber Pakhtunkhwa, Pakistan</p></div>
+      </div>
+    </aside>
+    <main>
+      <div class="topbar">
+        <div class="breadcrumb">Workspace <span aria-hidden="true"> / </span> <b>Field overview</b></div>
+        <div class="top-right"><span>Space Apps 2026</span><span class="avatar" aria-label="Project profile">FN</span></div>
+      </div>
+      <div class="content">
+        <header class="heading">
+          <div><div class="eyebrow">Peshawar Valley / 34.02°N, 71.58°E</div><h1>Field overview</h1><p class="subheading">A clearer picture of what your fields need next.</p></div>
+          <div class="date-pill">FIELD SEASON &nbsp;·&nbsp; KHARIF 2026</div>
+        </header>
+        <div class="status-line"><span class="status-badge">DEMO DATA</span><span>Illustrative values only · NASA data integration is not connected</span></div>
+        <section class="metrics" aria-label="Field indicators">
+          <div class="metric"><div class="metric-label">Soil moisture <span aria-hidden="true">↗</span></div><div class="metric-value" id="moistureMetric">24<small>%</small></div><div class="metric-foot">+2% from last week</div></div>
+          <div class="metric"><div class="metric-label">Rainfall · 30 days</div><div class="metric-value" id="rainMetric">42<small> mm</small></div><div class="metric-foot neutral">Near seasonal average</div></div>
+          <div class="metric"><div class="metric-label">Surface temperature</div><div class="metric-value">31<small>°C</small></div><div class="metric-foot neutral">ECOSTRESS · illustrative</div></div>
+          <div class="metric"><div class="metric-label">Rotation outlook</div><div class="metric-value" id="scoreMetric">Good</div><div class="metric-foot">For current conditions</div></div>
+        </section>
+        <div class="layout">
+          <section class="panel" aria-labelledby="conditionsTitle">
+            <div class="panel-head"><div><h2 id="conditionsTitle">Field conditions</h2><div class="panel-kicker">Recent trend · illustrative satellite estimate</div></div><select class="small-select" aria-label="Select field"><option>North field · 12 ha</option><option>Canal field · 8 ha</option><option>East field · 15 ha</option></select></div>
+            <div class="chart-wrap">
+              <div class="chart-legend"><span><i class="legend-dot"></i>Soil moisture</span><span><i class="legend-dot rain"></i>Rainfall</span></div>
+              <svg class="chart" viewBox="0 0 620 205" role="img" aria-label="Illustrative chart showing soil moisture and rainfall over six weeks">
+                <line class="grid" x1="42" y1="24" x2="605" y2="24"/><line class="grid" x1="42" y1="68" x2="605" y2="68"/><line class="grid" x1="42" y1="112" x2="605" y2="112"/><line class="grid" x1="42" y1="156" x2="605" y2="156"/>
+                <text x="8" y="27">40%</text><text x="8" y="71">30%</text><text x="8" y="115">20%</text><text x="8" y="159">10%</text>
+                <rect class="rain-bar" x="73" y="137" width="30" height="19" rx="2"/><rect class="rain-bar" x="164" y="123" width="30" height="33" rx="2"/><rect class="rain-bar" x="255" y="141" width="30" height="15" rx="2"/><rect class="rain-bar" x="346" y="108" width="30" height="48" rx="2"/><rect class="rain-bar" x="437" y="128" width="30" height="28" rx="2"/><rect class="rain-bar" x="528" y="116" width="30" height="40" rx="2"/>
+                <path class="soil-line" d="M88 96 C120 90 140 82 179 87 S234 99 270 91 S323 77 361 81 S416 93 452 82 S505 72 543 75"/>
+                <circle class="soil-dot" cx="88" cy="96" r="4"/><circle class="soil-dot" cx="179" cy="87" r="4"/><circle class="soil-dot" cx="270" cy="91" r="4"/><circle class="soil-dot" cx="361" cy="81" r="4"/><circle class="soil-dot" cx="452" cy="82" r="4"/><circle class="soil-dot" cx="543" cy="75" r="4"/>
+                <text x="74" y="181">JUN 08</text><text x="165" y="181">JUN 15</text><text x="256" y="181">JUN 22</text><text x="347" y="181">JUN 29</text><text x="438" y="181">JUL 06</text><text x="529" y="181">JUL 13</text>
+              </svg>
+            </div>
+            <div class="chart-note"><b>Reading the field:</b> moisture is holding steady; keep checking soil before the next irrigation.</div>
+          </section>
+          <section class="panel" aria-labelledby="rotationTitle">
+            <div class="panel-head"><div><h2 id="rotationTitle">Rotation outlook</h2><div class="panel-kicker">Suggested next crops</div></div><span class="eyebrow">3 OPTIONS</span></div>
+            <div class="rotation-body">
+              <div class="crop-row"><span class="crop-icon">✳</span><div><div class="crop-name">Mung bean</div><div class="crop-desc">Legume · restores soil nitrogen</div></div><span class="crop-score" id="mungScore">92</span></div>
+              <div class="crop-row"><span class="crop-icon">⌁</span><div><div class="crop-name">Maize</div><div class="crop-desc">Cereal · moderate water demand</div></div><span class="crop-score" id="maizeScore">78</span></div>
+              <div class="crop-row"><span class="crop-icon">✿</span><div><div class="crop-name">Sesame</div><div class="crop-desc">Oilseed · drought-tolerant option</div></div><span class="crop-score" id="sesameScore">84</span></div>
+              <div class="rotation-foot"><span>Best match for this scenario</span><strong id="topCrop">MUNG BEAN</strong></div>
+            </div>
+          </section>
+        </div>
+        <div class="bottom-grid">
+          <section class="panel field-photo" aria-label="Illustrative field landscape">
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&amp;fit=crop&amp;w=1100&amp;q=80" alt="Green agricultural fields beneath a wide sky" loading="lazy">
+            <div class="photo-shade"></div>
+            <div class="photo-caption"><div><small>LANDSCAPE CONTEXT · ILLUSTRATIVE</small><strong>Fields in the valley</strong></div><span>NOT SATELLITE IMAGERY</span></div>
+          </section>
+          <section class="panel" aria-labelledby="scenarioTitle">
+            <div class="panel-head"><div><h2 id="scenarioTitle">Explore a scenario</h2><div class="panel-kicker">Adjust conditions to compare crop fit</div></div></div>
+            <div class="controls">
+              <div class="control-row"><div class="control-head"><label for="moisture">Soil moisture</label><output id="moistureOutput" for="moisture">24%</output></div><input id="moisture" type="range" min="5" max="45" value="24"></div>
+              <div class="control-row"><div class="control-head"><label for="rainfall">Expected rainfall · 30 days</label><output id="rainOutput" for="rainfall">42 mm</output></div><input id="rainfall" type="range" min="0" max="120" value="42"></div>
+              <div class="recommendation" aria-live="polite"><small>Scenario note</small><p id="scenarioNote">Current conditions look balanced. Consider a legume to support soil health between cereal crops.</p></div>
+            </div>
+          </section>
+        </div>
+        <footer><span>FIELDNOTES · NASA SPACE APPS CHALLENGE 2026</span><span>Concept interface · not agronomic advice</span></footer>
+      </div>
+    </main>
+  </div>
+  <script>
+    const moistureInput = document.querySelector('#moisture');
+    const rainfallInput = document.querySelector('#rainfall');
+    const scenarioNote = document.querySelector('#scenarioNote');
+
+    function updateScenario() {
+      const moisture = Number(moistureInput.value);
+      const rainfall = Number(rainfallInput.value);
+      document.querySelector('#moistureOutput').value = `${moisture}%`;
+      document.querySelector('#rainOutput').value = `${rainfall} mm`;
+      document.querySelector('#moistureMetric').innerHTML = `${moisture}<small>%</small>`;
+      document.querySelector('#rainMetric').innerHTML = `${rainfall}<small> mm</small>`;
+
+      const mung = Math.max(35, Math.min(98, Math.round(92 + (moisture - 24) * 0.35 + (rainfall - 42) * 0.08)));
+      const maize = Math.max(35, Math.min(96, Math.round(78 + (moisture - 24) * 0.45 + (rainfall - 42) * 0.12)));
+      const sesame = Math.max(35, Math.min(97, Math.round(84 - (moisture - 24) * 0.12 - (rainfall - 42) * 0.1)));
+      const scores = [{ name: 'MUNG BEAN', value: mung }, { name: 'MAIZE', value: maize }, { name: 'SESAME', value: sesame }].sort((a, b) => b.value - a.value);
+      document.querySelector('#mungScore').textContent = mung;
+      document.querySelector('#maizeScore').textContent = maize;
+      document.querySelector('#sesameScore').textContent = sesame;
+      document.querySelector('#topCrop').textContent = scores[0].name;
+      document.querySelector('#scoreMetric').textContent = Math.max(mung, maize, sesame) >= 75 ? 'Good' : 'Watch';
+
+      if (moisture < 15 || rainfall < 20) {
+        scenarioNote.textContent = `Dry conditions in this scenario. ${scores[0].name.toLowerCase()} currently ranks highest; check local soil and water before planting.`;
+      } else if (rainfall > 80) {
+        scenarioNote.textContent = `Higher rainfall in this scenario. ${scores[0].name.toLowerCase()} currently ranks highest; consider drainage and waterlogging risk.`;
+      } else {
+        scenarioNote.textContent = `Current conditions look balanced. ${scores[0].name.toLowerCase()} ranks highest; consider soil health and recent crop history.`;
+      }
+    }
+
+    moistureInput.addEventListener('input', updateScenario);
+    rainfallInput.addEventListener('input', updateScenario);
+  </script>
+</body>
+</html>
