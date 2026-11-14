@@ -89,6 +89,22 @@
     ]
    },
    {
+    "id": "controls",
+    "icon": "layers",
+    "title": "Controls on the map",
+    "blocks": [
+     {
+      "ul": [
+       "The three buttons at the top of the map switch the background: a plain map, satellite imagery, or terrain. Imagery is useful for checking whether a dry union council really is farmland.",
+       "The fourth button turns the names and values on the map on and off. Names appear only where a unit is large enough on screen to hold the text, so zooming in reveals more of them.",
+       "Zooming past about level 8 on the province view draws every union council in Khyber Pakhtunkhwa at once, not just the districts.",
+       "The search box above each list filters by name, which is faster than hunting on the map.",
+       "The list is always sorted driest first, so the unit that needs attention is at the top."
+      ]
+     }
+    ]
+   },
+   {
     "id": "layers",
     "icon": "layers",
     "title": "Switching the map layer",
@@ -296,6 +312,22 @@
     ]
    },
    {
+    "id": "controls",
+    "icon": "layers",
+    "title": "نقشے کے کنٹرول",
+    "blocks": [
+     {
+      "ul": [
+       "نقشے کے اوپر تین بٹن پس منظر بدلتے ہیں: سادہ نقشہ، سیٹلائٹ تصویر، یا خطہ۔ تصویر سے یہ جانچا جا سکتا ہے کہ خشک یونین کونسل واقعی زرعی زمین ہے یا نہیں۔",
+       "چوتھا بٹن نقشے پر نام اور اعداد آن یا آف کرتا ہے۔ نام صرف وہاں آتے ہیں جہاں اکائی اسکرین پر کافی بڑی ہو، اس لیے زوم اِن کرنے سے مزید نام ظاہر ہوتے ہیں۔",
+       "صوبائی منظر میں تقریباً لیول 8 سے آگے زوم کرنے پر پورے خیبر پختونخوا کی تمام یونین کونسلیں ایک ساتھ نظر آتی ہیں۔",
+       "ہر فہرست کے اوپر تلاش کا خانہ نام سے چھانٹتا ہے، جو نقشے پر ڈھونڈنے سے تیز ہے۔",
+       "فہرست ہمیشہ سب سے خشک پہلے کے اعتبار سے ترتیب میں ہوتی ہے۔"
+      ]
+     }
+    ]
+   },
+   {
     "id": "layers",
     "icon": "layers",
     "title": "نقشے کی تہہ بدلنا",
@@ -498,6 +530,22 @@
         "h": "لور وګورئ",
         "p": "لاندې چارټ وروستۍ شپږ مودې ښیي. پرله پسې درې مودې لوړې نیلي کرښې او باران نه، هغه حالت دی چې تګ یې ارزي."
        }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "controls",
+    "icon": "layers",
+    "title": "د نقشې کنټرولونه",
+    "blocks": [
+     {
+      "ul": [
+       "د نقشې پورته درې تڼۍ شالید بدلوي: ساده نقشه، سپوږمکۍ انځور، یا ځمکنۍ بڼه. انځور ښیي چې وچه یونین کونسل په رښتیا کرنیزه ځمکه ده که نه.",
+       "څلورمه تڼۍ په نقشه کې نومونه او شمېرې ښکاره یا پټوي. نومونه يوازې هلته راځي چې واحد په سکرین کې دومره لوی وي، نو لویول نور نومونه راښکاره کوي.",
+       "په ولایتي کتنه کې تر نږدې ۸ کچې پورته لویول د ټول خیبر پښتونخوا ټول یونین کونسلونه یوځای راښیي.",
+       "د هر لیست پورته د لټون بکس په نوم چاڼ کوي، چې په نقشه کې لټولو څخه ګړندی دی.",
+       "لیست تل تر ټولو وچ لومړی ترتیب وي."
       ]
      }
     ]

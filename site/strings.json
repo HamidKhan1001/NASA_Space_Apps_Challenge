@@ -80,7 +80,9 @@
     "detail_off": "Zoom in to reveal every union council across the province.",
     "trend_title": "How the province moved",
     "districts_word": "districts",
-    "vs_previous": "against the previous ten days"
+    "vs_previous": "against the previous ten days",
+    "share": "Copy link",
+    "copied": "Link copied"
   },
   "ur": {
     "app_title": "کے پی اوپن فارم اٹلس",
@@ -162,7 +164,9 @@
     "detail_off": "پورے صوبے کی یونین کونسلیں دیکھنے کے لیے زوم اِن کریں۔",
     "trend_title": "صوبے کی صورتحال کیسے بدلی",
     "districts_word": "اضلاع",
-    "vs_previous": "پچھلے دس دنوں کے مقابلے میں"
+    "vs_previous": "پچھلے دس دنوں کے مقابلے میں",
+    "share": "لنک کاپی کریں",
+    "copied": "لنک کاپی ہو گیا"
   },
   "ps": {
     "app_title": "کې پي اوپن فارم اټلس",
@@ -244,6 +248,8 @@
     "detail_off": "د ټول ولایت یونین کونسلونه لیدلو لپاره لوی کړئ.",
     "trend_title": "ولایت څنګه بدل شو",
     "districts_word": "ولسوالۍ",
-    "vs_previous": "د تېرو لسو ورځو په پرتله"
+    "vs_previous": "د تېرو لسو ورځو په پرتله",
+    "share": "لینک کاپي کړئ",
+    "copied": "لینک کاپي شو"
   }
 }

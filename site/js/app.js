@@ -755,13 +755,31 @@
       el('span', {}, [document.createTextNode(t('crop_type_notice') + ' '),
         el('a', { href: 'methods.html', text: t('read_methods') })])]);
   }
+  function shareButton() {
+    var btn = el('button', { 'class': 'btn ghost', type: 'button' },
+      [icon('external', 'icon-sm'), el('span', { text: t('share') })]);
+    btn.addEventListener('click', function () {
+      var url = location.href;
+      var done = function () {
+        btn.lastChild.textContent = t('copied');
+        setTimeout(function () { btn.lastChild.textContent = t('share'); }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done, function () { prompt(t('share'), url); });
+      } else {
+        prompt(t('share'), url);
+      }
+    });
+    return btn;
+  }
   function actions(ser, id, label) {
     return el('div', { 'class': 'actions' }, [
       el('button', { 'class': 'btn', type: 'button', onclick: function () { downloadCSV(ser, id, label); } },
         [icon('download', 'icon-sm'), document.createTextNode(t('download_csv'))]),
       el('a', { 'class': 'btn ghost', download: '',
         href: DATA() + (state.level === 'uc' ? 'ucs/' + state.districtId + '.geojson' : 'districts.geojson') },
-        [icon('download', 'icon-sm'), document.createTextNode(t('download_geojson'))])]);
+        [icon('download', 'icon-sm'), document.createTextNode(t('download_geojson'))]),
+      shareButton()]);
   }
   function sourcesBlock(ser) {
     var box = el('div', { 'class': 'sources' });
@@ -888,6 +906,14 @@
       applyLang();
       qs('langSelect').addEventListener('change', function (e) { state.lang = e.target.value; applyLang(); rerender(true); });
       qs('dekadSelect').addEventListener('change', function (e) { state.dekadIndex = Number(e.target.value); rerender(true); });
+      // Escape steps back up a level; the map keeps keyboard focus usable
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+        if (state.level === 'uc') openDistrict(state.districtId);
+        else if (state.level === 'district') openProvince();
+      });
       var hash = location.hash.slice(1);
       if (/^PK\.KP\.[A-Z]{3}\./.test(hash)) openUC(hash.split('.').slice(0, 3).join('.'), hash);
       else if (/^PK\.KP\.[A-Z]{3}$/.test(hash)) openDistrict(hash);
