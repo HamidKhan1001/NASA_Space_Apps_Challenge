@@ -1,0 +1,17 @@
+name: Validate data contract
+
+on:
+  push:
+    paths: ["data/**", "pipeline/**", ".github/workflows/validate-data.yml"]
+  pull_request:
+    paths: ["data/**", "pipeline/**"]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 pipeline/validate_data.py

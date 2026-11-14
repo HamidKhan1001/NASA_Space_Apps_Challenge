@@ -1,0 +1,93 @@
+{
+ "generated_at": "2026-11-14T07:46:45Z",
+ "mode": "demo",
+ "latest_dekad": {
+  "start": "2026-11-01",
+  "end": "2026-11-10"
+ },
+ "dekads": [
+  {
+   "start": "2026-09-11",
+   "end": "2026-09-20"
+  },
+  {
+   "start": "2026-09-21",
+   "end": "2026-09-30"
+  },
+  {
+   "start": "2026-10-01",
+   "end": "2026-10-10"
+  },
+  {
+   "start": "2026-10-11",
+   "end": "2026-10-20"
+  },
+  {
+   "start": "2026-10-21",
+   "end": "2026-10-31"
+  },
+  {
+   "start": "2026-11-01",
+   "end": "2026-11-10"
+  }
+ ],
+ "thresholds": {
+  "unit": "mm per dekad",
+  "rule": "deficit_mm = et_mm - rain_mm, computed per dekad on the union-council (tehsil) mean",
+  "green": {
+   "max_deficit_mm": 0,
+   "label_en": "Rain covered crop water use"
+  },
+  "amber": {
+   "max_deficit_mm": 30,
+   "label_en": "Deficit of 1 to 30 mm; one irrigation turn covers it"
+  },
+  "red": {
+   "label_en": "Deficit above 30 mm; stress likely if canal water is late"
+  },
+  "nodata": {
+   "label_en": "No irrigated winter cereals, or a source was missing"
+  },
+  "rationale": "Rabi wheat in the Peshawar valley uses about 3 to 4 mm/day in Nov-Dec, i.e. 30 to 40 mm per dekad. A single canal irrigation turn delivers roughly 30 mm (75 mm depth applied at 40% efficiency). See docs/thresholds.md."
+ },
+ "sources": {
+  "et": {
+   "name": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+   "dataset": "FAO/WAPOR/3/L2_AETI_D (not connected)",
+   "status": "synthetic",
+   "licence": "CC BY 4.0 (FAO)"
+  },
+  "rain": {
+   "name": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
+   "dataset": "power.larc.nasa.gov temporal/daily/point, community AG",
+   "status": "live",
+   "licence": "Public domain (NASA)"
+  },
+  "crops": {
+   "name": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation",
+   "dataset": "ESA/WorldCereal/2021/MODELS/v100",
+   "status": "synthetic",
+   "licence": "CC BY 4.0 (ESA)"
+  },
+  "boundaries": {
+   "name": "geoBoundaries gbOpen Pakistan ADM2 (districts, 2019) and ADM3 (tehsils, 2017)",
+   "dataset": "github.com/wmgeolab/geoBoundaries release 9469f09",
+   "status": "live",
+   "licence": "Public domain / CC BY 4.0 (geoBoundaries)",
+   "note": "Level-3 units are tehsils, not union councils; 31 districts reflect 2019 boundaries."
+  }
+ },
+ "counts": {
+  "districts": 31,
+  "level3_units": 122,
+  "district_status": {
+   "green": 0,
+   "amber": 27,
+   "red": 4,
+   "nodata": 0
+  },
+  "rain_missing_units": 0
+ },
+ "unit_note": "Level-3 units are tehsils from geoBoundaries until union-council polygons are sourced.",
+ "contract_version": "0.1"
+}

@@ -1,0 +1,16 @@
+# secrets: never commit Earth Engine service-account keys
+*service-account*.json
+ee-key*.json
+.env
+
+# pipeline scratch
+pipeline/raw/
+pipeline/cache/
+__pycache__/
+*.pyc
+
+# site/data is populated by the deploy workflow (copy of /data); locally use scripts/serve.sh
+site/data
+
+.DS_Store
+site/js/data-snapshot.js
