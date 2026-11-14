@@ -22,7 +22,7 @@
   var state = {
     lang: localStorage.getItem('atlas.lang') || 'en',
     level: 'province', districtId: null, ucId: null,
-    dekadIndex: null, layer: 'status', query: ''
+    dekadIndex: null, layer: 'status', query: '', detail: false
   };
   var meta = null, strings = {}, districts = null;
   var ucCache = {}, seriesCache = {};
@@ -115,6 +115,37 @@
     if (!seriesCache[id]) seriesCache[id] = getJSON('series/' + id + '.json').catch(function () { return null; });
     return seriesCache[id];
   }
+  var allUCsPromise = null;
+  function loadAllUCs() {
+    if (!allUCsPromise) allUCsPromise = getJSON('ucs/all.geojson')
+      .catch(function () { return { type: 'FeatureCollection', features: [] }; });
+    return allUCsPromise;
+  }
+  // Province view: districts until the reader zooms in, then every union council.
+  var DETAIL_ZOOM = 8;
+  function syncDetail() {
+    if (state.level !== 'province') return;
+    var want = map.getZoom() >= DETAIL_ZOOM;
+    if (want === state.detail) return;
+    state.detail = want;
+    if (!want) {
+      if (ucLayer) { map.removeLayer(ucLayer); ucLayer = null; }
+      drawDistricts(provinceStatuses);
+      renderLegend();
+      return;
+    }
+    setLoading(true);
+    loadAllUCs().then(function (fc) {
+      if (state.level !== 'province' || !state.detail) { setLoading(false); return; }
+      return statusesFor(fc.features, 'uc_id').then(function (st) {
+        drawDistricts(provinceStatuses);
+        drawUCs(fc, st);
+        setLoading(false);
+      });
+    });
+  }
+  var provinceStatuses = null;
+
   function loadUCs(did) {
     if (!ucCache[did]) ucCache[did] = getJSON('ucs/' + did + '.geojson')
       .catch(function () { return { type: 'FeatureCollection', features: [] }; });
@@ -192,10 +223,16 @@
     L.control.zoom({ position: 'topleft' }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
     map.on('zoomend moveend', updateLabels);
+    map.on('zoomend', syncDetail);
     setBase(activeBase);
     qs('mapToggle').addEventListener('click', function () {
       showPanel(document.body.classList.contains('show-map'));
     });
+  }
+  function detailHint() {
+    if (state.level !== 'province') return null;
+    return el('p', { 'class': 'hint' }, [
+      el('span', { text: state.detail ? t('detail_on') : t('detail_off') })]);
   }
   function restyle() {
     if (districtLayer) districtLayer.setStyle(function (f) {
@@ -268,7 +305,8 @@
   function drawDistricts(statusById) {
     if (districtLayer) map.removeLayer(districtLayer);
     resetLabels();
-    var dim = state.level !== 'province';
+    var detailed = state.level !== 'province' || state.detail;
+    var dim = detailed;
     districtLayer = L.geoJSON(districts, {
       style: function (f) { return styleFor(statusById ? statusById[f.properties.district_id] : f.properties.status, dim); },
       onEachFeature: function (f, layer) {
@@ -372,12 +410,15 @@
     if (ucLayer) { map.removeLayer(ucLayer); ucLayer = null; }
     setLoading(true);
     statusesFor(districts.features, 'district_id').then(function (st) {
+      provinceStatuses = st;
+      state.detail = map.getZoom() >= DETAIL_ZOOM;
       drawDistricts(st);
       fit(districtLayer.getBounds(), 12);
       renderLegend();
       renderProvince(st);
       showPanel(window.innerWidth > 820);
       setLoading(false);
+      syncDetail();
     });
     history.replaceState(null, '', '#');
   }
@@ -402,6 +443,11 @@
     });
     inner.appendChild(grid);
 
+    inner.appendChild(el('h2', {}, [icon('chart'), document.createTextNode(t('trend_title'))]));
+    var trend = el('div', { 'class': 'chart', style: 'height:180px' });
+    inner.appendChild(trend);
+    provinceTrend(trend);
+
     inner.appendChild(el('h2', {}, [icon('map'), document.createTextNode(t('districts_title', { n: districts.features.length }))]));
     inner.appendChild(searchBox());
     var rows = districts.features.slice().sort(function (a, b) {
@@ -411,14 +457,58 @@
     var list = el('ul', { 'class': 'list' });
     rows.forEach(function (f) {
       var p = f.properties, st = statusById ? statusById[p.district_id] : p.status;
-      list.appendChild(listRow(COLORS[st], nameOf(p),
+      var row = listRow(COLORS[st], nameOf(p),
         isLatest() && p.deficit_mm != null ? fmtMm(p.deficit_mm) + ' ' + t('mm') : '',
-        function () { openDistrict(p.district_id); }));
+        function () { openDistrict(p.district_id); });
+      list.appendChild(row);
+      movement(p.district_id, row);
     });
     if (!rows.length) list.appendChild(el('li', { 'class': 'hint', text: t('no_match') }));
     inner.appendChild(list);
     inner.appendChild(el('p', { 'class': 'hint', text: t('tap_district') }));
+    var hint = detailHint();
+    if (hint) inner.appendChild(hint);
     inner.appendChild(sourcesBlock());
+  }
+
+  function provinceTrend(node) {
+    Promise.all(districts.features.map(function (f) { return series(f.properties.district_id); }))
+      .then(function (all) {
+        var counts = meta.dekads.map(function () { return { green: 0, amber: 0, red: 0, nodata: 0 }; });
+        var got = 0;
+        all.forEach(function (ser) {
+          if (!ser || !ser.dekads) return;
+          got++;
+          ser.dekads.forEach(function (d, i) { if (counts[i]) counts[i][d.status]++; });
+        });
+        if (!got) { node.replaceWith(el('p', { 'class': 'hint', text: t('no_series') })); return; }
+        var x = meta.dekads.map(function (d) { return fmtDate(d.start); });
+        var bar = function (key, color) {
+          return { type: 'bar', name: t('status_' + key), x: x,
+                   y: counts.map(function (c) { return c[key]; }), marker: { color: color },
+                   hovertemplate: '%{y} ' + t('districts_word') + '<extra>' + t('status_' + key) + '</extra>' };
+        };
+        loadPlotly().then(function () {
+          Plotly.newPlot(node, [bar('red', COLORS.red), bar('amber', COLORS.amber),
+                                bar('green', COLORS.green), bar('nodata', COLORS.nodata)], {
+            barmode: 'stack', height: 180, margin: { l: 30, r: 8, t: 4, b: 26 },
+            legend: { orientation: 'h', y: 1.3, x: 0, font: { size: 10 } },
+            yaxis: { gridcolor: '#eef1f6', fixedrange: true },
+            xaxis: { tickfont: { size: 10 }, fixedrange: true },
+            paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Inter, system-ui, sans-serif', color: '#39414d' }
+          }, { displayModeBar: false, responsive: true });
+        }).catch(function () {
+          var tbl = el('table', { 'class': 'chart-table' });
+          tbl.appendChild(el('tr', {}, [el('th', { text: t('dekad') }), el('th', { text: t('status_red') }),
+            el('th', { text: t('status_amber') }), el('th', { text: t('status_green') })]));
+          counts.forEach(function (c, i) {
+            tbl.appendChild(el('tr', {}, [el('td', { text: dekadLabel(meta.dekads[i]) }),
+              el('td', { text: c.red }), el('td', { text: c.amber }), el('td', { text: c.green })]));
+          });
+          node.replaceWith(tbl);
+        });
+      });
   }
 
   // ------------------------------------------------------------------ district
@@ -472,6 +562,11 @@
     });
     inner.appendChild(chips);
 
+    inner.appendChild(el('h2', {}, [icon('chart'), document.createTextNode(t('chart_title'))]));
+    var dchart = el('div', { 'class': 'chart' });
+    inner.appendChild(dchart);
+    renderChart(dchart, dser);
+
     inner.appendChild(el('h2', {}, [icon('map'), document.createTextNode(t('ucs_title', { n: fc.features.length }))]));
     inner.appendChild(searchBox());
     var rows = fc.features.slice().sort(function (a, b) {
@@ -484,8 +579,10 @@
       var val = state.layer === 'status'
         ? (isLatest() && u.deficit_mm != null ? fmtMm(u.deficit_mm) + ' ' + t('mm') : '')
         : (u[state.layer] == null ? t('not_connected') : fmtInt(u[state.layer]) + ' ' + t('ha'));
-      list.appendChild(listRow(COLORS[st], u.uc_name_en, val, function () { openUC(u.district_id, u.uc_id); },
-        state.layer !== 'status' && u[state.layer] == null));
+      var row = listRow(COLORS[st], u.uc_name_en, val, function () { openUC(u.district_id, u.uc_id); },
+        state.layer !== 'status' && u[state.layer] == null);
+      list.appendChild(row);
+      if (state.layer === 'status') movement(u.uc_id, row);
     });
     if (!rows.length) list.appendChild(el('li', { 'class': 'hint', text: t('no_match') }));
     inner.appendChild(list);
@@ -581,6 +678,22 @@
       value ? el('span', { 'class': 'val num' + (muted ? ' muted' : ''), text: value }) : null,
       icon('chevron-right', 'go icon-sm')
     ]);
+  }
+  // a small arrow next to the value: did this unit get drier or wetter?
+  function movement(id, row) {
+    series(id).then(function (ser) {
+      if (!ser || !ser.dekads || state.dekadIndex < 1) return;
+      var now = ser.dekads[state.dekadIndex], prev = ser.dekads[state.dekadIndex - 1];
+      if (!now || !prev || now.deficit_mm == null || prev.deficit_mm == null) return;
+      var diff = now.deficit_mm - prev.deficit_mm;
+      if (Math.abs(diff) < 1) return;
+      var val = row.querySelector('.val');
+      if (!val) return;
+      var mark = el('span', { 'class': 'move ' + (diff > 0 ? 'worse' : 'better'),
+        title: (diff > 0 ? '+' : '') + fmtMm(diff) + ' ' + t('mm') + ' ' + t('vs_previous'),
+        text: diff > 0 ? '\u25B2' : '\u25BC' });
+      val.parentNode.insertBefore(mark, val);
+    });
   }
   function statusCard(cur, p) {
     var st = cur.status || 'nodata';

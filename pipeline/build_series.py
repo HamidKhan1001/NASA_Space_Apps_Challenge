@@ -287,6 +287,10 @@ def main():
         dump_json(os.path.join(out, "ucs", f"{did}.geojson"),
                   {"type": "FeatureCollection", "generated_at": generated_at, "district_id": did,
                    "features": feats}, compact=True)
+    # one combined file so the province view can reveal every union council on zoom
+    dump_json(os.path.join(out, "ucs", "all.geojson"),
+              {"type": "FeatureCollection", "generated_at": generated_at,
+               "features": [f for feats in ucs.values() for f in feats]}, compact=True)
 
     census = {}
     cpath = os.path.join(HERE, "census_2024.csv")

@@ -75,7 +75,12 @@
     "base_light": "Plain map",
     "base_imagery": "Satellite imagery",
     "base_terrain": "Terrain",
-    "toggle_labels": "Show names on the map"
+    "toggle_labels": "Show names on the map",
+    "detail_on": "Union council outlines are shown. Zoom out for districts only.",
+    "detail_off": "Zoom in to reveal every union council across the province.",
+    "trend_title": "How the province moved",
+    "districts_word": "districts",
+    "vs_previous": "against the previous ten days"
   },
   "ur": {
     "app_title": "کے پی اوپن فارم اٹلس",
@@ -152,7 +157,12 @@
     "base_light": "سادہ نقشہ",
     "base_imagery": "سیٹلائٹ تصویر",
     "base_terrain": "خطہ",
-    "toggle_labels": "نقشے پر نام دکھائیں"
+    "toggle_labels": "نقشے پر نام دکھائیں",
+    "detail_on": "یونین کونسلوں کی حدود دکھائی جا رہی ہیں۔ صرف اضلاع کے لیے زوم آؤٹ کریں۔",
+    "detail_off": "پورے صوبے کی یونین کونسلیں دیکھنے کے لیے زوم اِن کریں۔",
+    "trend_title": "صوبے کی صورتحال کیسے بدلی",
+    "districts_word": "اضلاع",
+    "vs_previous": "پچھلے دس دنوں کے مقابلے میں"
   },
   "ps": {
     "app_title": "کې پي اوپن فارم اټلس",
@@ -229,6 +239,11 @@
     "base_light": "ساده نقشه",
     "base_imagery": "سپوږمکۍ انځور",
     "base_terrain": "ځمکنۍ بڼه",
-    "toggle_labels": "په نقشه کې نومونه ښکاره کړه"
+    "toggle_labels": "په نقشه کې نومونه ښکاره کړه",
+    "detail_on": "د یونین کونسلونو پولې ښکاري. يوازې ولسوالۍ لپاره بېرته کوچنی کړئ.",
+    "detail_off": "د ټول ولایت یونین کونسلونه لیدلو لپاره لوی کړئ.",
+    "trend_title": "ولایت څنګه بدل شو",
+    "districts_word": "ولسوالۍ",
+    "vs_previous": "د تېرو لسو ورځو په پرتله"
   }
 }

@@ -292,6 +292,10 @@ html[dir="rtl"] .status-tag { letter-spacing: 0; }
 .list .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
 .list .val { margin-inline-start: auto; color: var(--ink-2); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 .list .val.muted { color: var(--muted); font-weight: 500; }
+.list .move { margin-inline-start: auto; font-size: 10px; line-height: 1; }
+.list .move + .val { margin-inline-start: 6px; }
+.list .move.worse { color: var(--red); }
+.list .move.better { color: var(--green); }
 .list .go { color: #b7c1cf; }
 html[dir="rtl"] .list .go { transform: scaleX(-1); }
 .hint { margin: 10px 0 0; color: var(--muted); font-size: 12.5px; }
