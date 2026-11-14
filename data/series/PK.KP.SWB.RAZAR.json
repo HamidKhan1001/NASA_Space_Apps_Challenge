@@ -1,0 +1,72 @@
+{
+ "uc_id": "PK.KP.SWB.RAZAR",
+ "name_en": "Razar",
+ "district_id": "PK.KP.SWB",
+ "dekads": [
+  {
+   "start": "2026-09-11",
+   "end": "2026-09-20",
+   "et_mm": 44.2,
+   "rain_mm": 37.5,
+   "deficit_mm": 6.7,
+   "status": "amber"
+  },
+  {
+   "start": "2026-09-21",
+   "end": "2026-09-30",
+   "et_mm": 44.2,
+   "rain_mm": 18.1,
+   "deficit_mm": 26.1,
+   "status": "amber"
+  },
+  {
+   "start": "2026-10-01",
+   "end": "2026-10-10",
+   "et_mm": 34.4,
+   "rain_mm": 4.1,
+   "deficit_mm": 30.3,
+   "status": "red"
+  },
+  {
+   "start": "2026-10-11",
+   "end": "2026-10-20",
+   "et_mm": 34.4,
+   "rain_mm": 12.3,
+   "deficit_mm": 22.1,
+   "status": "amber"
+  },
+  {
+   "start": "2026-10-21",
+   "end": "2026-10-31",
+   "et_mm": 37.8,
+   "rain_mm": 0.2,
+   "deficit_mm": 37.6,
+   "status": "red"
+  },
+  {
+   "start": "2026-11-01",
+   "end": "2026-11-10",
+   "et_mm": 27.5,
+   "rain_mm": 0.2,
+   "deficit_mm": 27.3,
+   "status": "amber"
+  }
+ ],
+ "hectares": {
+  "crop_ha": 18205,
+  "wheat_ha": 12611,
+  "maize_ha": 6718,
+  "irrigated_ha": 12890
+ },
+ "sources": {
+  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
+  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+ },
+ "source_status": {
+  "et": "synthetic",
+  "rain": "live",
+  "crops": "synthetic"
+ },
+ "generated_at": "2026-11-14T07:46:45Z"
+}

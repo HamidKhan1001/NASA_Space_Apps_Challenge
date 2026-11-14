@@ -1,0 +1,60 @@
+name: Update data (weekly)
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"      # Mondays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pipeline/requirements.txt
+
+      - name: Install
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Restore NASA POWER cache
+        uses: actions/cache@v4
+        with:
+          path: pipeline/cache/power
+          key: power-${{ github.run_id }}
+          restore-keys: power-
+
+      - name: Boundaries
+        run: python3 pipeline/prepare_boundaries.py
+
+      - name: NASA POWER rainfall
+        run: python3 pipeline/fetch_power.py --days 75
+
+      - name: Build /data (WaPOR via Earth Engine when the secret is present)
+        env:
+          EE_SERVICE_ACCOUNT_KEY: ${{ secrets.EE_SERVICE_ACCOUNT_KEY }}
+          EE_PROJECT: kp-farm-atlas
+        run: python3 pipeline/build_series.py
+
+      - name: Validate contract
+        run: python3 pipeline/validate_data.py
+
+      - name: Commit
+        run: |
+          git config user.name "atlas-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data pipeline/uc_ids.csv
+          DEKAD=$(python3 -c "import json;print(json.load(open('data/meta.json'))['latest_dekad']['start'])")
+          git diff --cached --quiet && echo "no changes" || git commit -m "data: dekad $DEKAD"
+          git push

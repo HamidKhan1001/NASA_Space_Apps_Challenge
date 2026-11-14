@@ -1,0 +1,72 @@
+{
+ "uc_id": "PK.KP.MAN.BALAKOT",
+ "name_en": "Balakot",
+ "district_id": "PK.KP.MAN",
+ "dekads": [
+  {
+   "start": "2026-09-11",
+   "end": "2026-09-20",
+   "et_mm": 44.0,
+   "rain_mm": 22.3,
+   "deficit_mm": 21.7,
+   "status": "amber"
+  },
+  {
+   "start": "2026-09-21",
+   "end": "2026-09-30",
+   "et_mm": 44.0,
+   "rain_mm": 4.9,
+   "deficit_mm": 39.1,
+   "status": "red"
+  },
+  {
+   "start": "2026-10-01",
+   "end": "2026-10-10",
+   "et_mm": 34.2,
+   "rain_mm": 1.9,
+   "deficit_mm": 32.3,
+   "status": "red"
+  },
+  {
+   "start": "2026-10-11",
+   "end": "2026-10-20",
+   "et_mm": 34.2,
+   "rain_mm": 24.3,
+   "deficit_mm": 9.9,
+   "status": "amber"
+  },
+  {
+   "start": "2026-10-21",
+   "end": "2026-10-31",
+   "et_mm": 37.6,
+   "rain_mm": 0.7,
+   "deficit_mm": 36.9,
+   "status": "red"
+  },
+  {
+   "start": "2026-11-01",
+   "end": "2026-11-10",
+   "et_mm": 27.4,
+   "rain_mm": 2.6,
+   "deficit_mm": 24.8,
+   "status": "amber"
+  }
+ ],
+ "hectares": {
+  "crop_ha": 87992,
+  "wheat_ha": 55991,
+  "maize_ha": 24928,
+  "irrigated_ha": 56502
+ },
+ "sources": {
+  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
+  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+ },
+ "source_status": {
+  "et": "synthetic",
+  "rain": "live",
+  "crops": "synthetic"
+ },
+ "generated_at": "2026-11-14T07:46:45Z"
+}
