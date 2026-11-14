@@ -11,8 +11,8 @@
 | Roadmap | Five phases (Foundation, Core Atlas, Data Visualization, Methods/i18n, Final Integration) |
 | Last repository inspection | 2026-11-14 |
 | Last updated | 2026-11-14 |
-| Current overall progress | **0%** — no Atlas phase started |
-| Current status | Pre-Phase 1. Only legacy prototype files exist; awaiting admin removal before clean-slate build |
+| Current overall progress | **1%** — baseline cleanup only; no Atlas phase feature built |
+| Current status | Phase 1 started. Legacy prototype files removed; architecture and data contract still unconfirmed |
 
 > **Read this file before starting any project task.**
 > This document overrides assumptions from previous sessions, prompts, branches, pull requests, chat history, and the legacy prototype. If a request conflicts with this file, stop and explain the conflict before changing architecture, scope, technology, or data claims.
@@ -273,9 +273,7 @@ This is a team project. Responsibilities are split; do not silently absorb anoth
 
 | Item | Verified state |
 |---|---|
-| Root files | `AGENTS.md`, `index.html`, `indexes.html`, `README.md`, `LICENSE` |
-| `index.html` | Legacy single-page NASA/Fieldnotes prototype, inline CSS and JS, not the Atlas |
-| `indexes.html` | Legacy dashboard copy, inline CSS and JS |
+| Root files | `AGENTS.md`, `README.md`, `LICENSE` |
 | `README.md` | Describes the earlier NASA Earth observation prototype |
 | `assets/` | Does not exist |
 | `data/` | Does not exist |
@@ -285,7 +283,7 @@ This is a team project. Responsibilities are split; do not silently absorb anoth
 | Deployment configuration | Not present |
 | Atlas phase implementation | None |
 
-The legacy prototype is slated for removal by the admin. It is recorded in section 13 and earns no phase credit.
+The legacy prototype was removed on 2026-11-14. It is recorded in section 13 and earns no phase credit.
 
 ### Planned target stack
 
@@ -475,14 +473,14 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 ### PHASE 1 — Project Foundation, Architecture & Professional Design System
 
-**Status:** Not Started — 0%  
+**Status:** In Progress — 7%  
 **Owner:** Frontend/UI
 
 **Purpose:** Establish the project foundation and visual identity.
 
 **Expected work:**
 
-- [ ] Confirm clean-slate repository after admin removes legacy prototype files.
+- [x] Confirm clean-slate repository after legacy prototype files are removed.
 - [ ] Confirm project folder structure and architecture with the team.
 - [ ] Create design tokens (color, typography, spacing, radii, shadow, z-index).
 - [ ] Build base styles (reset, typography, utilities, focus states).
@@ -507,7 +505,7 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 - [ ] Data-service boundary exists and contains no UI logic.
 - [ ] No duplicated shell implementations.
 
-**Dependencies:** Admin removal of legacy work; team agreement on architecture and folder layout; initial data-contract shape.
+**Dependencies:** Legacy prototype removal (done); team agreement on architecture and folder layout; initial data-contract shape.
 
 ---
 
@@ -667,7 +665,7 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 | Phase | Name | Status | Progress | Verified notes |
 |---|---|---|---|---|
-| Phase 1 | Foundation, Architecture & Design System | Not Started | 0% | No Atlas files, tokens, shell, components, or i18n exist |
+| Phase 1 | Foundation, Architecture & Design System | In Progress | 7% | Clean-slate baseline confirmed; no tokens, shell, components, or i18n exist yet |
 | Phase 2 | Core Atlas & Geographic Exploration | Not Started | 0% | No map, boundaries, controls, or legend implementation exists |
 | Phase 3 | Agricultural & Environmental Data Visualization | Not Started | 0% | No indicator views, charts, CSV export, or data service exists |
 | Phase 4 | Methods, Data Sources, Validation & Multilingual Support | Not Started | 0% | No Methods page, documentation, translations, or RTL exists |
@@ -677,13 +675,13 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 | Metric | Value |
 |---|---|
-| Overall completion | **0%** |
-| Current active phase | None — pre-Phase 1 |
+| Overall completion | **1%** |
+| Current active phase | Phase 1 — Foundation, Architecture & Design System |
 | Completed phases | 0 of 5 |
 | Pending phases | All five |
-| Critical issues | Legacy prototype still present; no data contract; no verified KP datasets |
+| Critical issues | No data contract; no verified KP datasets; no Atlas implementation |
 | External dependencies | See section 11 |
-| Next development priority | Admin removal of legacy files, then Phase 1 design tokens and shared shell |
+| Next development priority | Confirm architecture, then Phase 1 design tokens and shared shell |
 
 Progress is calculated only from verified tasks. No phase receives credit for the legacy prototype, placeholder text, or delivered prompts.
 
@@ -691,15 +689,15 @@ Progress is calculated only from verified tasks. No phase receives credit for th
 
 | Field | Value |
 |---|---|
-| Status | Not Started |
-| Progress | 0% |
-| Completed tasks | None |
+| Status | In Progress |
+| Progress | 7% |
+| Completed tasks | Clean-slate repository confirmed after legacy prototype removal |
 | Partially completed tasks | None |
-| Pending tasks | All Phase 1 tasks in section 6 |
+| Pending tasks | All remaining Phase 1 tasks in section 6 |
 | Known bugs | None observed for this phase; no Atlas code exists |
-| Blockers | Legacy work not removed; architecture not confirmed; contract shape unknown |
-| Relevant files | None for Phase 1; legacy `index.html` and `indexes.html` are not Atlas foundation |
-| Next action | Confirm clean-slate removal, then create design tokens and shared shell |
+| Blockers | Architecture not confirmed; contract shape unknown |
+| Relevant files | None for Phase 1; legacy prototype files were removed |
+| Next action | Confirm architecture, then create design tokens and shared shell |
 
 ### Phase 2 tracker
 
@@ -949,7 +947,7 @@ When completing meaningful work:
 
 | ID | Dependency | Needed by | Impact if missing | Owner | Status |
 |---|---|---|---|---|---|
-| D-01 | Admin removal of legacy prototype files | Phase 1 | Prevents a clean baseline and risks mixing prototype with Atlas | Project admin | Open |
+| D-01 | Admin removal of legacy prototype files | Phase 1 | Prevents a clean baseline and risks mixing prototype with Atlas | Project admin | Resolved — removed 2026-11-14 |
 | D-02 | Confirmed frontend architecture and folder layout | Phase 1 | Rework and inconsistent modules | Frontend lead + team | Open |
 | D-03 | Confirmed backend/data contract | Phase 1–3 | UI cannot bind to real data; risk of invented schemas | Backend/data lead | Open |
 | D-04 | Verified administrative boundaries for KP | Phase 2 | Atlas map cannot render real geography | Data lead | Open |
@@ -985,18 +983,18 @@ Update a row to `Resolved` only when the real artifact has been received and ins
 
 ## 13. Legacy work register (do not build on this)
 
-The following exist in the repository or its history but belong to an earlier NASA/Fieldnotes prototype. They are not part of the KP Open Farm Atlas and are slated for removal by the admin before the clean-slate build.
+The following existed in the repository or its history but belong to an earlier NASA/Fieldnotes prototype. They are not part of the KP Open Farm Atlas and were removed from the working tree on 2026-11-14 before the clean-slate build.
 
 | Item | Current state | Decision |
 |---|---|---|
-| `index.html` | Legacy Fieldnotes/NASA prototype landing and dashboard (1,035 lines) | Disposable; do not reuse as Atlas foundation; no phase credit |
-| `indexes.html` | Legacy dashboard copy | Disposable; no phase credit |
+| `index.html` | Legacy Fieldnotes/NASA prototype landing and dashboard (1,035 lines) | Removed 2026-11-14; do not reuse as Atlas foundation; no phase credit |
+| `indexes.html` | Legacy dashboard copy | Removed 2026-11-14; no phase credit |
 | `README.md` | Describes the earlier NASA Earth observation prototype | To be rewritten for the Atlas in Phase 1 |
 | `feature/index-page` | Old landing-page branch | Disposable |
 | `feature/unified-index` | Old merged-prototype branch and PR #3 | Disposable |
 | Existing PRs and upstream history | Prototype work | Not part of the Atlas source of truth |
 
-If the admin has not yet removed these files, do not start Phase 1 implementation. Record the delay in section 11.
+The legacy files have been removed, so Phase 1 implementation may proceed. Do not reintroduce prototype code as Atlas foundation.
 
 ---
 
@@ -1006,6 +1004,7 @@ If the admin has not yet removed these files, do not start Phase 1 implementatio
 |---|---|---|
 | 2026-11-14 | Created `AGENTS.md` after repository inspection. Recorded all phases as Not Started (0%) because no KP Open Farm Atlas implementation exists. Registered legacy prototype files and external dependencies. | OpenCode, on behalf of the frontend owner |
 | 2026-11-14 | Updated `AGENTS.md` to the broader agricultural and environmental Atlas identity; replaced the water-balance-only framing and old phase roadmap; added the candidate dataset inventory, team responsibilities, verified-vs-planned architecture, permanent rule categories, expanded tracker evidence, integration contract, quality checklist, and 15 OpenCode session instructions. Progress remains 0% with all phases Not Started. | OpenCode, on behalf of the frontend owner |
+| 2026-11-14 | Removed legacy prototype files `index.html` and `indexes.html` from the working tree; confirmed clean-slate baseline. Resolved dependency D-01, updated the repository-state table, legacy register, Phase 1 roadmap and tracker, and set Phase 1 to In Progress 7% and overall progress to 1%. | OpenCode, on behalf of the frontend owner |
 
 ---
 
