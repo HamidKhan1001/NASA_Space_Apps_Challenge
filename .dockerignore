@@ -1,0 +1,8 @@
+.git
+.github
+_site
+pipeline/cache
+pipeline/raw
+pitch
+**/__pycache__
+*.pyc

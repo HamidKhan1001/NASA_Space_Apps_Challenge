@@ -41,13 +41,26 @@ Without Earth Engine credentials and `pipeline/worldcereal_stats.csv`, evapotran
 
 ## Deploy
 
-Both targets build the same folder with `./scripts/build-site.sh`, which copies `data/` and `docs/` next to the pages and regenerates the offline snapshot.
+There is no server and no database. The pipeline writes static files, the site reads them, and a scheduled job keeps them current. That means nothing can crash during a demo and hosting costs nothing.
 
-**Render (recommended).** The repository carries a [`render.yaml`](render.yaml) blueprint. In the Render dashboard choose New, then Blueprint, point it at this repository and apply. It creates a free static site with build command `./scripts/build-site.sh` and publish directory `_site`, rebuilds on every push to `main`, and gives pull requests their own preview URL. To add it by hand instead: New, then Static Site, same two settings.
+```
+NASA POWER + ESA WorldCover  ->  pipeline (weekly job)  ->  /data/*.json  ->  static site
+```
 
-**GitHub Pages.** Settings, then Pages, source GitHub Actions. `deploy-pages.yml` publishes on every push to `main`.
+**The site.** Build with `./scripts/build-site.sh`, publish `_site`.
 
-`update-data.yml` re-runs the pipeline every Monday 03:00 UTC, or on demand, and commits `data: dekad YYYY-MM-DD`, which triggers a fresh deploy on both.
+| Host | How | Cost |
+|---|---|---|
+| Render Static Site | New, then Static Site. Build command `./scripts/build-site.sh`, publish directory `_site`, root directory blank. | free |
+| Render Blueprint | New, then Blueprint, pointed at this repository. Reads [`render.yaml`](render.yaml). | free |
+| Render Web Service (Docker) | Only if you want a container. Root directory blank, Dockerfile path `./Dockerfile`. | free tier sleeps |
+| GitHub Pages | Settings, then Pages, source GitHub Actions. | free |
+
+A Static Site is the right choice: it is served from a CDN, it never sleeps, and the whole point of the architecture is that no process has to stay alive. The Dockerfile exists only for hosts that insist on a container; it builds the same `_site` and serves it with nginx on `$PORT`.
+
+**The data, which is what a backend would otherwise do.** `.github/workflows/update-data.yml` re-runs the pipeline every Monday at 03:00 UTC, or on demand from the Actions tab, and commits `data: dekad YYYY-MM-DD`. That commit triggers a fresh deploy on Render and on Pages, so the map updates itself with nobody touching it.
+
+To switch it on: open the Actions tab, enable workflows, select **Update data (weekly)**, then **Run workflow**. It must go green once by hand before you rely on the schedule. Earth Engine credentials are optional; without them the pipeline uses the NASA-only path described above.
 
 ## Data sources and licences
 ESA WorldCereal 2021 (CC BY 4.0) · FAO WaPOR v3 (CC BY 4.0) · NASA POWER (public domain) · geoBoundaries (public domain / CC BY). Details and known weaknesses in [docs/sources.md](docs/sources.md). Code is MIT; data files carry attribution to ESA, FAO and NASA.
