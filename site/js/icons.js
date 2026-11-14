@@ -27,6 +27,8 @@
     sym('alert', '<path d="M12 4.5 2.8 20h18.4L12 4.5Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="1.1" fill="currentColor" stroke="none"/>') +
     sym('check', '<circle cx="12" cy="12" r="9"/><path d="m8 12.3 2.7 2.7L16 9.7"/>') +
     sym('external', '<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>') +
+    sym('play', '<path d="M8 5.5v13l11-6.5z"/>') +
+    sym('pause', '<path d="M9 5v14M15 5v14"/>') +
     sym('refresh', '<path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.5"/><path d="M4 4v4.5h4.5"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.5"/><path d="M20 20v-4.5h-4.5"/>') +
     '</svg>';
 

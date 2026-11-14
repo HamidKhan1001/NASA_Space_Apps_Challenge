@@ -105,6 +105,12 @@ html[dir="rtl"] .brand-text span { letter-spacing: 0; }
   max-width: 168px; min-width: 0; padding: 0 2px; cursor: pointer;
 }
 .field select option { color: var(--ink); }
+.field .play {
+  display: grid; place-items: center; width: 24px; height: 24px; margin-inline-start: 2px;
+  border: 0; border-radius: 5px; background: rgba(255, 255, 255, .16); color: #fff; cursor: pointer;
+}
+.field .play:hover { background: rgba(255, 255, 255, .3); }
+.field .play.on { background: var(--nasa-red); }
 .tool-link {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 11px;
   border-radius: var(--r-sm); color: #fff; text-decoration: none; font-size: 13px; font-weight: 550;
@@ -420,7 +426,13 @@ figure.diagram figcaption { margin-top: 10px; font-size: 12.5px; color: var(--mu
   :root { --header-h: 54px; }
   .brand-text span { display: none; }
   .tool-link span { display: none; }
-  .tool-link { padding: 0 9px; }
+  .field .play {
+  display: grid; place-items: center; width: 24px; height: 24px; margin-inline-start: 2px;
+  border: 0; border-radius: 5px; background: rgba(255, 255, 255, .16); color: #fff; cursor: pointer;
+}
+.field .play:hover { background: rgba(255, 255, 255, .3); }
+.field .play.on { background: var(--nasa-red); }
+.tool-link { padding: 0 9px; }
   .field select { max-width: 112px; font-size: 12.5px; }
   .stage { display: block; }
   #map { position: absolute; inset: 0; }
@@ -472,7 +484,13 @@ figure.diagram figcaption { margin-top: 10px; font-size: 12.5px; color: var(--mu
   .top { gap: 7px; padding: 0 9px; }
   .field { padding: 0 6px; height: 32px; }
   .field select { max-width: 98px; }
-  .tool-link { padding: 0 7px; height: 32px; }
+  .field .play {
+  display: grid; place-items: center; width: 24px; height: 24px; margin-inline-start: 2px;
+  border: 0; border-radius: 5px; background: rgba(255, 255, 255, .16); color: #fff; cursor: pointer;
+}
+.field .play:hover { background: rgba(255, 255, 255, .3); }
+.field .play.on { background: var(--nasa-red); }
+.tool-link { padding: 0 7px; height: 32px; }
   .badge { font-size: 9.5px; padding: 3px 6px; }
   .status-big .v { font-size: 30px; }
   .stats { grid-template-columns: 1fr 1fr; }

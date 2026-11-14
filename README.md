@@ -7,8 +7,8 @@ The first public map of **what grows where in Khyber Pakhtunkhwa, which land is 
 ![Validate data](https://github.com/HamidKhan1001/NASA_Space_Apps_Challenge/actions/workflows/validate-data.yml/badge.svg) ![Update data](https://github.com/HamidKhan1001/NASA_Space_Apps_Challenge/actions/workflows/update-data.yml/badge.svg)
 
 ## What it shows
-1. **Province:** 31 districts coloured green, amber or red by water balance for the latest dekad (ten days). Six dekads to choose from. English, Urdu, Pashto.
-2. **District:** its union councils (tehsils in v0.1), coloured by status, or shaded by hectares of cropland, winter cereals, maize or irrigated area.
+1. **Province:** 31 districts coloured green, amber or red by water balance for the latest ten-day period, with a chart of how the whole province moved across the last six. Press play to animate them. Switch between a plain map, satellite imagery and terrain, and zoom in to reveal every union council. English, Urdu, Pashto.
+2. **District:** its union councils (tehsils in v0.1), coloured by status or shaded by hectares, with a searchable list sorted driest first and an arrow showing which way each unit moved.
 3. **Union council:** hectares, the deficit in millimetres, a six-dekad chart of crop water use against rainfall, CSV and GeoJSON download, sources and dates.
 4. **Guide:** a built-in tutorial at `/guide.html` in all three languages that explains the colours, the five steps, the vocabulary and the limits.
 5. **Methods and validation:** what each dataset is, how the traffic light is computed, and our cropped-area numbers against the 2024 Agricultural Census, including where they disagree.

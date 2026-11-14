@@ -82,7 +82,9 @@
     "districts_word": "districts",
     "vs_previous": "against the previous ten days",
     "share": "Copy link",
-    "copied": "Link copied"
+    "copied": "Link copied",
+    "play": "Play the six periods",
+    "pause": "Pause"
   },
   "ur": {
     "app_title": "کے پی اوپن فارم اٹلس",
@@ -166,7 +168,9 @@
     "districts_word": "اضلاع",
     "vs_previous": "پچھلے دس دنوں کے مقابلے میں",
     "share": "لنک کاپی کریں",
-    "copied": "لنک کاپی ہو گیا"
+    "copied": "لنک کاپی ہو گیا",
+    "play": "چھ ادوار چلائیں",
+    "pause": "روکیں"
   },
   "ps": {
     "app_title": "کې پي اوپن فارم اټلس",
@@ -250,6 +254,8 @@
     "districts_word": "ولسوالۍ",
     "vs_previous": "د تېرو لسو ورځو په پرتله",
     "share": "لینک کاپي کړئ",
-    "copied": "لینک کاپي شو"
+    "copied": "لینک کاپي شو",
+    "play": "شپږ مودې چلول",
+    "pause": "ودرول"
   }
 }

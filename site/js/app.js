@@ -22,7 +22,7 @@
   var state = {
     lang: localStorage.getItem('atlas.lang') || 'en',
     level: 'province', districtId: null, ucId: null,
-    dekadIndex: null, layer: 'status', query: '', detail: false
+    dekadIndex: null, layer: 'status', query: '', detail: false, playing: false
   };
   var meta = null, strings = {}, districts = null;
   var ucCache = {}, seriesCache = {};
@@ -413,7 +413,7 @@
       provinceStatuses = st;
       state.detail = map.getZoom() >= DETAIL_ZOOM;
       drawDistricts(st);
-      fit(districtLayer.getBounds(), 12);
+      if (!state.playing) fit(districtLayer.getBounds(), 12);
       renderLegend();
       renderProvince(st);
       showPanel(window.innerWidth > 820);
@@ -522,7 +522,7 @@
       return statusesFor(fc.features, 'uc_id').then(function (st) {
         drawDistricts(null);
         var breaks = drawUCs(fc, st);
-        if (!keepView && ucLayer.getLayers().length) fit(ucLayer.getBounds(), 24);
+        if (!keepView && !state.playing && ucLayer.getLayers().length) fit(ucLayer.getBounds(), 24);
         renderLegend(breaks);
         renderDistrict(dFeature, fc, dser, st);
         if (!keepView) showPanel(true);
@@ -874,6 +874,21 @@
     qs('footSources').textContent = t('footer_sources');
     qs('mapToggleLabel').textContent = document.body.classList.contains('show-map') ? t('show_details') : t('show_map');
   }
+  var playTimer = null;
+  function setPlaying(on) {
+    state.playing = on;
+    var btn = qs('playBtn');
+    btn.classList.toggle('on', on);
+    btn.firstChild.firstChild.setAttribute('href', on ? '#i-pause' : '#i-play');
+    btn.setAttribute('aria-label', on ? t('pause') : t('play'));
+    if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    if (!on) return;
+    playTimer = setInterval(function () {
+      state.dekadIndex = (state.dekadIndex + 1) % meta.dekads.length;
+      qs('dekadSelect').value = state.dekadIndex;
+      rerender(true);
+    }, 1500);
+  }
   function fillDekads() {
     var sel = qs('dekadSelect');
     sel.innerHTML = '';
@@ -905,7 +920,12 @@
       buildMapControls();
       applyLang();
       qs('langSelect').addEventListener('change', function (e) { state.lang = e.target.value; applyLang(); rerender(true); });
-      qs('dekadSelect').addEventListener('change', function (e) { state.dekadIndex = Number(e.target.value); rerender(true); });
+      qs('dekadSelect').addEventListener('change', function (e) {
+        setPlaying(false);
+        state.dekadIndex = Number(e.target.value);
+        rerender(true);
+      });
+      qs('playBtn').addEventListener('click', function () { setPlaying(!state.playing); });
       // Escape steps back up a level; the map keeps keyboard focus usable
       document.addEventListener('keydown', function (e) {
         if (e.key !== 'Escape') return;
