@@ -1,0 +1,43 @@
+/* Base: reset, document defaults, typography, links, form controls and focus.
+   No layout or component rules here. */
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; overflow-x: hidden; }
+
+body {
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Nastaliq Urdu", "Noto Sans Arabic", sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+[dir="rtl"] body,
+body[dir="rtl"] {
+  font-family: "Noto Nastaliq Urdu", "Noto Sans Arabic", "Jameel Noori Nastaleeq", system-ui, sans-serif;
+}
+
+a { color: var(--accent); }
+
+button, select, input { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+
+:focus-visible {
+  outline: 2px solid var(--focus-color);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.muted { color: var(--muted); }
+
+/* Visually hidden but available to assistive tech. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

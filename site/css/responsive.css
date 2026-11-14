@@ -1,0 +1,38 @@
+/* Responsive: mobile-first adjustments. The shell is desktop-first in markup,
+   so this file collapses the map/panel stage to a single-column workspace on
+   phones and trims the header. Single breakpoint (760px) matches the JS
+   `window.innerWidth > 760` checks in app.js. */
+@media (max-width: 760px) {
+  :root { --header-h: 48px; }
+
+  .top { gap: 8px; padding: 0 10px; }
+  .ctl span { display: none; }
+  .ctl select { max-width: 104px; font-size: 12px; padding: 4px 2px; }
+  .brand-long, .methods-link { display: none; }
+  .brand-short { display: inline; }
+  .brand { font-size: 14px; }
+  .badge { font-size: 10px; padding: 2px 5px; }
+  .top-controls { gap: 6px; min-width: 0; }
+
+  /* Full-screen panel over an absolutely-positioned map. */
+  .stage { display: block; }
+  #map { position: absolute; inset: 0; }
+  .panel {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    z-index: var(--z-panel);
+    border: 0;
+    padding-top: 12px;
+    padding-bottom: 90px;
+  }
+
+  .legend { max-width: 200px; font-size: 11px; padding: 8px 10px; }
+  .kv .v { font-size: 16px; }
+  .foot { font-size: 10px; gap: 10px; }
+
+  /* Toggle between map and details. */
+  .map-toggle { display: block; }
+  body.show-map .panel { display: none; }
+  body:not(.show-map) .leaflet-control-container { display: none; }
+}

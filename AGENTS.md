@@ -11,8 +11,8 @@
 | Roadmap | Five phases (Foundation, Core Atlas, Data Visualization, Methods/i18n, Final Integration) |
 | Last repository inspection | 2026-11-14 |
 | Last updated | 2026-11-14 |
-| Current overall progress | **1%** — baseline cleanup only; no Atlas phase feature built |
-| Current status | Phase 1 started. Legacy prototype files removed; architecture and data contract still unconfirmed |
+| Current overall progress | **14%** — Phase 1 foundation largely built on the team's `site/` frontend |
+| Current status | Phase 1 in progress (~70%). Design tokens, base/layout/components/responsive CSS, service boundary, i18n service and shared state primitives implemented on the team's `site/` app. Browser-level responsive/RTL verification pending |
 
 > **Read this file before starting any project task.**
 > This document overrides assumptions from previous sessions, prompts, branches, pull requests, chat history, and the legacy prototype. If a request conflicts with this file, stop and explain the conflict before changing architecture, scope, technology, or data claims.
@@ -89,6 +89,8 @@ The Atlas must not be described or implemented as exclusively a crop-rotation re
 3. **Sub-district level** — inspect available Union Council or equivalent administrative information.
 
 Exact administrative levels, names, and counts must come from verified data and metadata supplied by the team/organizers.
+
+**Confirmed implementation note (2026-11-14):** in the team's `data/` contract the third level is the **tehsil** (geoBoundaries ADM3), not the Union Council, and `data/districts.geojson` carries **31 districts** (2019 KP district set). The UI labels the third level "union council (tehsil)" but must not claim Union Council boundaries. Treat district/tehsil names and counts as data-driven, never hardcoded.
 
 ### Intended users
 
@@ -273,75 +275,98 @@ This is a team project. Responsibilities are split; do not silently absorb anoth
 
 | Item | Verified state |
 |---|---|
-| Root files | `AGENTS.md`, `README.md`, `LICENSE` |
-| `README.md` | Describes the earlier NASA Earth observation prototype |
-| `assets/` | Does not exist |
-| `data/` | Does not exist |
-| JavaScript modules/services | Do not exist |
-| Leaflet / Plotly | Not present |
-| i18n / RTL implementation | Not present |
-| Deployment configuration | Not present |
-| Atlas phase implementation | None |
+| Root files | `AGENTS.md`, `README.md`, `LICENSE`, `.gitignore`, `docs/`, `data/`, `pipeline/`, `scripts/`, `.github/workflows/` |
+| `README.md` | Rewritten by the team for the Atlas (local preview, pipeline, deploy) |
+| `data/` | Exists — demo data contract v0.1 (`meta.json` `mode:"demo"`, `districts.geojson`, `ucs/`, `series/`, `validation.csv`) |
+| `docs/` | `docs/data-contract.md` (v0.1) and `docs/methods.md` exist |
+| `pipeline/` | `make_snapshot.py` and related build scripts exist |
+| Frontend app | Team-built static app under `site/` (`index.html`, `methods.html`, `css/`, `js/`, `strings.json`) |
+| JavaScript modules/services | Extracted into `site/js/config.js`, `site/js/utils.js`, `site/js/services/*`, `site/js/components/*` (Phase 1) |
+| Leaflet / Plotly | Leaflet 1.9.4 and Plotly 2.35.2 loaded from CDN |
+| i18n / RTL implementation | `site/strings.json` (en/ur/ps) plus `site/js/services/i18n.js`; `dir`/`lang` switching implemented |
+| Deployment configuration | `.github/workflows/deploy-pages.yml` publishes `site/` (with `data/` and `docs/` copied in) to GitHub Pages |
+| Design system | `site/css/tokens.css`, `base.css`, `layout.css`, `components.css`, `responsive.css` (Phase 1) |
+| Atlas phase implementation | Phase 1 foundation implemented; no new map/analytics features added |
 
 The legacy prototype was removed on 2026-11-14. It is recorded in section 13 and earns no phase credit.
 
-### Planned target stack
+### Actual stack (verified)
 
-The established project direction is a lightweight static frontend:
+The frontend is a lightweight static app, matching the planned direction:
 
 - HTML5.
 - CSS3.
-- Vanilla JavaScript.
-- Leaflet for interactive maps.
-- Plotly for charts, where used.
+- Vanilla JavaScript (ES5-style, no bundler).
+- Leaflet 1.9.4 for the interactive map.
+- Plotly basic 2.35.2 for charts (loaded on demand).
+- marked 12.0.2 to render the Methods markdown.
+- Anime.js 3.2.2 vendored at `site/vendor/anime.min.js` (approved; subtle transitions only, reduced-motion aware).
 - Static hosting with GitHub Pages compatibility.
 
 Do not introduce React, Vue, Angular, Next.js, Svelte, a Node build system, Docker, a frontend database, or unnecessary dependencies without explicit team approval.
 
-The actual verified implementation takes precedence over this target list if the team approves and implements a different stack.
-
-### Proposed folder structure (not implemented)
-
-The following layout is a proposal to confirm in Phase 1. It is not current repository structure.
+### Actual folder structure (verified 2026-11-14)
 
 ```text
 /
 ├── AGENTS.md
 ├── README.md
 ├── LICENSE
-├── index.html                  # Atlas entry point
-├── methods.html                # Methods and Data Sources page
-├── assets/
-│   ├── css/
-│   │   ├── tokens.css          # Design tokens
-│   │   ├── base.css            # Reset, typography, utilities
-│   │   └── components.css      # Shared components
-│   ├── js/
-│   │   ├── app.js              # Bootstrap and page initialization
-│   │   ├── components/         # Header, footer, legend, panels, states
-│   │   ├── services/           # Data access, adapters, i18n, CSV export
-│   │   └── pages/              # Atlas and Methods page controllers
-│   └── i18n/
-│       ├── en.json
-│       ├── ur.json
-│       └── ps.json
-└── data/                       # Confirmed, team-provided data only
-    ├── districts.geojson
-    ├── ucs/
-    ├── series/
-    ├── meta.json
-    └── validation.csv
+├── .github/workflows/deploy-pages.yml   # publishes site/ + data/ + docs/
+├── data/                                # team-provided demo data (contract v0.1)
+│   ├── districts.geojson                # 31 districts (2019 set)
+│   ├── meta.json                        # mode:"demo", thresholds, sources, dekads
+│   ├── ucs/<district_id>.geojson        # ADM3 tehsils (not Union Council boundaries)
+│   ├── series/<unit_id>.json            # per-dekad et/rain/deficit/status
+│   └── validation.csv
+├── docs/
+│   ├── data-contract.md                 # authoritative frontend data contract
+│   └── methods.md
+├── pipeline/
+│   └── make_snapshot.py                 # bundles data/ + strings.json for offline demo
+├── scripts/
+│   └── serve.sh                         # local static preview
+└── site/                                # deployable frontend (Pages root)
+    ├── index.html                       # Atlas page (map + panel)
+    ├── methods.html                     # Methods & validation page
+    ├── strings.json                     # single i18n dictionary (en/ur/ps)
+    ├── css/
+    │   ├── tokens.css                   # design tokens
+    │   ├── base.css                     # reset, typography, focus
+    │   ├── layout.css                   # shell: header, stage, footer, doc
+    │   ├── components.css               # badges, legend, cards, chips, buttons...
+    │   └── responsive.css               # mobile breakpoint
+    ├── js/
+    │   ├── config.js                    # endpoints, palette mirror, layer list
+    │   ├── utils.js                     # DOM/number/date/colour helpers
+    │   ├── app.js                       # Atlas page controller
+    │   ├── methods.js                   # Methods page controller
+    │   ├── components/
+    │   │   ├── legend.js                # metadata-driven legend
+    │   │   └── states.js                # loading / error primitives
+    │   └── services/
+    │       ├── state.js                 # shared app state + language persistence
+    │       ├── i18n.js                  # dictionary load, t(), lang/dir
+    │       ├── data-service.js          # only module that knows data/ URLs + snapshot
+    │       ├── csv.js                   # CSV export
+    │       └── motion.js                # reduced-motion-aware Anime.js wrapper
+    └── vendor/
+        └── anime.min.js                 # vendored Anime.js 3.2.2 (MIT)
 ```
 
-The `data/` filenames are provisional examples; see section 8.
+The deploy workflow stages `site/` as the site root and copies `data/` and `docs/` alongside it, so runtime URLs stay relative (`data/...`, `docs/...`, `strings.json`).
 
-### Application entry points and pages (planned)
+Note: `site/strings.json` is the single i18n dictionary (the earlier three-file `en/ur/ps.json` plan was superseded — see change log). `site/data/` and `site/js/data-snapshot.js` are gitignored (populated by the deploy workflow / snapshot script).
+
+### Application entry points and pages (implemented)
 
 - `index.html` — main Atlas experience: map, geographic selection, indicators, legends.
 - `methods.html` — Methods and Data Sources page: datasets, methodology, limitations, validation.
 - Shared application shell across both pages: header, navigation, language switcher, footer, state components.
 
-### Map architecture (planned)
+Both pages share the same stylesheet set and shell classes (`.top`, `.brand`, `.stage`, `.foot`). The Atlas page is fully i18n-wired; the Methods page remains English-only until Phase 4, when the shared i18n service is applied to it.
+
+### Map architecture (implemented in the team's `site/` app; extended in Phase 2)
 
 - Leaflet map container initialized once per page.
 - KP framing established from verified boundary data, not hardcoded assumptions.
@@ -349,7 +374,7 @@ The `data/` filenames are provisional examples; see section 8.
 - Selection state managed at the page/controller level and reflected in the map, details panel, and URL/state as agreed.
 - Layer controls only for confirmed datasets.
 - Geographic loading, error, empty, and no-data states handled explicitly.
-- Union Council or finer boundaries loaded on demand for the selected area only.
+- Tehsil (ADM3) boundaries loaded on demand for the selected district only.
 - Mobile-first map workspace with accessible controls.
 
 ### Chart architecture (planned)
@@ -360,24 +385,26 @@ The `data/` filenames are provisional examples; see section 8.
 - Charts handle loading, empty, partial, and error states.
 - Heavy chart code loaded on demand where practical.
 
-### Translation architecture (planned)
+### Translation architecture (implemented)
 
-- Central dictionaries: `en.json`, `ur.json`, `ps.json`.
-- All user-facing strings resolved through the i18n service; no duplicated per-page translations.
-- `dir` and `lang` updated correctly for Urdu and Pashto; layouts verified in RTL.
-- Language choice persisted and preserved across navigation.
-- Missing translation keys fall back safely and are reported during development.
+- Single dictionary `site/strings.json` with `en`/`ur`/`ps` sections (supersedes the earlier three-file plan — see change log).
+- `site/js/services/i18n.js` loads it, resolves `t(key, vars)` with an English fallback, and updates `<html lang>`/`dir`.
+- All Atlas user-facing strings resolve through the service; no duplicated per-page translations.
+- Language choice persisted (`atlas.lang`) and reapplied on load; the Atlas re-renders on change.
+- Missing keys fall back to English, then to the key itself.
+- RTL direction switching implemented; visual RTL layout verification still pending (Phase 4).
 
-### Data services and adapter boundaries (planned)
+### Data services and adapter boundaries (implemented)
 
-- A dedicated data-access/service layer owns URLs, fetch behavior, parsing, caching, normalization, and errors.
-- Dataset-specific adapters translate the confirmed backend contract into UI-ready shapes.
+- `site/js/services/data-service.js` is the only module that knows `data/` URLs, fetch behavior, caching, and the offline snapshot fallback. Other modules request domain objects (`meta`, `districts`, `ucs`, `series`).
+- The service normalises the confirmed demo contract (v0.1, `docs/data-contract.md`) into UI-ready shapes.
 - UI components must not know external API response formats.
-- No secrets or API keys in the static frontend; data must be precomputed/proxied by the team.
+- No secrets or API keys in the static frontend; data is precomputed by the team's pipeline.
 - Missing values remain `null`/absent and are rendered as no-data, never coerced to `0`.
 
 ### Static assets and deployment
 
+- `.github/workflows/deploy-pages.yml` publishes `site/` to GitHub Pages; only changes under `site/**`, `data/**`, or `docs/**` trigger a deploy, so new frontend files must live under `site/`.
 - Relative URLs compatible with GitHub Pages subpath hosting.
 - No server-side routing assumptions, runtime environment variables, or server code.
 - Prefer SVG/CSS or optimized raster assets; avoid heavy media.
@@ -473,7 +500,7 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 ### PHASE 1 — Project Foundation, Architecture & Professional Design System
 
-**Status:** In Progress — 7%  
+**Status:** In Progress — 70%  
 **Owner:** Frontend/UI
 
 **Purpose:** Establish the project foundation and visual identity.
@@ -481,31 +508,31 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 **Expected work:**
 
 - [x] Confirm clean-slate repository after legacy prototype files are removed.
-- [ ] Confirm project folder structure and architecture with the team.
-- [ ] Create design tokens (color, typography, spacing, radii, shadow, z-index).
-- [ ] Build base styles (reset, typography, utilities, focus states).
-- [ ] Build shared application shell (header, navigation, footer, page container).
-- [ ] Build responsive layout foundation and breakpoints.
-- [ ] Build shared components (buttons, cards, panels, tables, badges, legends, states).
-- [ ] Create centralized i18n dictionaries for English, Urdu, and Pashto.
-- [ ] Implement language switcher, persistence, and direction switching.
-- [ ] Verify RTL readiness for Urdu and Pashto.
-- [ ] Define the data-service architecture and adapter boundary.
-- [ ] Add loading, empty, partial-data, error, and no-data state primitives.
-- [ ] Write the frontend architecture note and update README.
-- [ ] Verify shell behavior on desktop, tablet, and mobile.
+- [x] Confirm project folder structure and architecture with the team. (Settled on the team's `site/` app + `data/` contract; recorded in section 4.)
+- [x] Create design tokens (color, typography, spacing, radii, shadow, z-index). (`site/css/tokens.css`.)
+- [x] Build base styles (reset, typography, utilities, focus states). (`site/css/base.css`.)
+- [x] Build shared application shell (header, navigation, footer, page container). (`site/css/layout.css` + shared markup/classes.)
+- [x] Build responsive layout foundation and breakpoints. (`site/css/responsive.css`.)
+- [x] Build shared components (buttons, cards, panels, tables, badges, legends, states). (`site/css/components.css`, `site/js/components/legend.js`, `site/js/components/states.js`.)
+- [x] Create centralized i18n dictionaries for English, Urdu, and Pashto. (Single `site/strings.json`.)
+- [x] Implement language switcher, persistence, and direction switching. (`site/js/services/i18n.js`, `state.js`.)
+- [~] Verify RTL readiness for Urdu and Pashto. (Direction switching implemented; browser RTL verification pending — Phase 4.)
+- [x] Define the data-service architecture and adapter boundary. (`site/js/services/data-service.js`.)
+- [x] Add loading, empty, partial-data, error, and no-data state primitives. (`site/js/components/states.js` + no-data rendering in `app.js`.)
+- [~] Write the frontend architecture note and update README. (README updated by the team; architecture captured in section 4.)
+- [~] Verify shell behavior on desktop, tablet, and mobile. (Static/served checks pass; browser-level responsive verification pending.)
 
 **Completion criteria:**
 
-- [ ] Design tokens are used consistently across the shell and components.
-- [ ] The shared shell works on the Atlas and Methods pages.
-- [ ] Responsive foundation verified at target widths.
-- [ ] Components are reused at least twice and documented in code.
-- [ ] Language switching and RTL are verified.
-- [ ] Data-service boundary exists and contains no UI logic.
-- [ ] No duplicated shell implementations.
+- [x] Design tokens are used consistently across the shell and components.
+- [x] The shared shell works on the Atlas and Methods pages.
+- [ ] Responsive foundation verified at target widths. (Requires browser verification.)
+- [x] Components are reused at least twice and documented in code.
+- [ ] Language switching and RTL are verified. (Implementation done; browser verification pending.)
+- [x] Data-service boundary exists and contains no UI logic.
+- [x] No duplicated shell implementations.
 
-**Dependencies:** Legacy prototype removal (done); team agreement on architecture and folder layout; initial data-contract shape.
+**Dependencies:** Legacy prototype removal (done); team agreement on architecture and folder layout (settled on `site/`); initial data-contract shape (v0.1 present).
 
 ---
 
@@ -665,8 +692,8 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 | Phase | Name | Status | Progress | Verified notes |
 |---|---|---|---|---|
-| Phase 1 | Foundation, Architecture & Design System | In Progress | 7% | Clean-slate baseline confirmed; no tokens, shell, components, or i18n exist yet |
-| Phase 2 | Core Atlas & Geographic Exploration | Not Started | 0% | No map, boundaries, controls, or legend implementation exists |
+| Phase 1 | Foundation, Architecture & Design System | In Progress | 70% | Tokens, base/layout/components/responsive CSS, service boundary, i18n and state primitives implemented on `site/`; browser responsive/RTL verification pending |
+| Phase 2 | Core Atlas & Geographic Exploration | Not Started | 0% | Map drilldown exists in the team app but is not yet audited/owned as Phase 2; no Phase 2 sign-off |
 | Phase 3 | Agricultural & Environmental Data Visualization | Not Started | 0% | No indicator views, charts, CSV export, or data service exists |
 | Phase 4 | Methods, Data Sources, Validation & Multilingual Support | Not Started | 0% | No Methods page, documentation, translations, or RTL exists |
 | Phase 5 | Final Integration, Performance & QA | Not Started | 0% | No integration, performance, or deployment verification exists |
@@ -675,13 +702,13 @@ The roadmap describes the five planned phases. It does not mean any phase is com
 
 | Metric | Value |
 |---|---|
-| Overall completion | **1%** |
+| Overall completion | **14%** |
 | Current active phase | Phase 1 — Foundation, Architecture & Design System |
 | Completed phases | 0 of 5 |
 | Pending phases | All five |
-| Critical issues | No data contract; no verified KP datasets; no Atlas implementation |
+| Critical issues | Demo data only (`mode:"demo"`); no verified production KP datasets; browser responsive/RTL verification outstanding |
 | External dependencies | See section 11 |
-| Next development priority | Confirm architecture, then Phase 1 design tokens and shared shell |
+| Next development priority | Verify Phase 1 in a browser, then audit the team's map drilldown as Phase 2 |
 
 Progress is calculated only from verified tasks. No phase receives credit for the legacy prototype, placeholder text, or delivered prompts.
 
@@ -690,14 +717,14 @@ Progress is calculated only from verified tasks. No phase receives credit for th
 | Field | Value |
 |---|---|
 | Status | In Progress |
-| Progress | 7% |
-| Completed tasks | Clean-slate repository confirmed after legacy prototype removal |
-| Partially completed tasks | None |
-| Pending tasks | All remaining Phase 1 tasks in section 6 |
-| Known bugs | None observed for this phase; no Atlas code exists |
-| Blockers | Architecture not confirmed; contract shape unknown |
-| Relevant files | None for Phase 1; legacy prototype files were removed |
-| Next action | Confirm architecture, then create design tokens and shared shell |
+| Progress | 70% |
+| Completed tasks | Clean-slate baseline; design tokens; base/layout/components/responsive CSS; shared state/i18n services; data-service boundary; loading/error/no-data primitives; legend component; Anime.js vendored and motion service |
+| Partially completed tasks | Architecture note (captured in section 4); RTL and responsive verification (implementation done, browser check pending) |
+| Pending tasks | Browser verification of responsive shell, RTL layout, language switching |
+| Known bugs | None observed; static checks and asset smoke test pass. No console-level browser run performed |
+| Blockers | None for the foundation itself; browser verification tooling |
+| Relevant files | `site/css/*`, `site/js/config.js`, `site/js/utils.js`, `site/js/services/*`, `site/js/components/*`, `site/js/app.js`, `site/vendor/anime.min.js` |
+| Next action | Browser-verify Phase 1 across desktop/tablet/mobile and en/ur/ps, then close Phase 1 |
 
 ### Phase 2 tracker
 
@@ -757,39 +784,46 @@ Progress is calculated only from verified tasks. No phase receives credit for th
 
 ### Verified completed features
 
-None. No KP Open Farm Atlas implementation has been built or verified in this repository.
+Phase 1 foundation (statically verified: `node --check` on all JS, JSON parse, CSS brace balance, HTML asset smoke test over a local HTTP server). Browser console/responsive/RTL verification is still outstanding.
+
+- Design-token stylesheet consumed by base/layout/components/responsive layers.
+- Service boundary (`data-service.js`) plus i18n, state, csv and motion services.
+- Shared legend and state (loading/error) components.
+- Language switching with persistence and `dir`/`lang` toggling.
+
+No map, analytics, or scientific feature is claimed as Phase 1 work.
 
 ### Remaining work
 
-All five phases, beginning with a clean-slate Phase 1.
+Finish Phase 1 browser verification; then Phases 2–5.
 
 ---
 
 ## 8. Real Data & Integration Contract
 
-The final backend/data contract is **not yet supplied**. This section records what the frontend expects to consume and what must be confirmed. Nothing here is a confirmed schema.
+A demo data contract **v0.1 exists and is documented** at `docs/data-contract.md`, with demo data under `data/` (`meta.json` carries `mode:"demo"` and `contract_version 0.1`). It is a demo contract, not yet a production/real-data contract. This section records what the frontend consumes today and what must still be confirmed for real data.
 
-`Pending Backend/Data Contract Confirmation` applies to every interface in this section.
+`Pending production data confirmation` applies to every category not marked as demo-confirmed below.
 
 ### Expected information categories
 
 | Category | Frontend need | Status |
 |---|---|---|
-| Geographic boundaries | Administrative geometries by level | Pending confirmation |
-| Geographic identifiers | Stable IDs and names for every area | Pending confirmation |
-| Dataset identifiers | Stable dataset/product IDs and metadata | Pending confirmation |
-| Agricultural measurements | Confirmed agricultural attributes and units | Pending confirmation |
-| Satellite-derived indicators | Confirmed indicator values, units, periods | Pending confirmation |
+| Geographic boundaries | Administrative geometries by level | Demo v0.1 confirmed (31 districts + ADM3 tehsils) |
+| Geographic identifiers | Stable IDs and names for every area | Demo v0.1 confirmed (e.g. `PK.KP.CHA`) |
+| Dataset identifiers | Stable dataset/product IDs and metadata | Demo v0.1 confirmed (`meta.json`) |
+| Agricultural measurements | Confirmed agricultural attributes and units | Demo v0.1 (hectares); production pending |
+| Satellite-derived indicators | Confirmed indicator values, units, periods | Demo v0.1 (`et_mm`, `rain_mm`, `deficit_mm`); production pending |
 | Soil and moisture observations | Confirmed soil/moisture variables | Pending confirmation |
-| Rainfall and precipitation | Confirmed precipitation variables and periods | Pending confirmation |
+| Rainfall and precipitation | Confirmed precipitation variables and periods | Demo v0.1 (`rain_mm`); production pending |
 | Weather and climate measurements | Confirmed parameters, units, periods | Pending confirmation |
 | Terrain and elevation | Confirmed elevation/terrain products | Pending confirmation |
 | Environmental observations | Confirmed environmental indicators | Pending confirmation |
-| Time-series observations | Ordered observations with dates and units | Pending confirmation |
-| Reporting-period metadata | Period IDs, start/end dates, labels | Pending confirmation |
-| Dataset source information | Provider, product, version, citation, license | Pending confirmation |
-| Spatial and temporal resolution | Resolution, coverage, cadence | Pending confirmation |
-| Validation data | Reference data and approved statistics | Pending confirmation |
+| Time-series observations | Ordered observations with dates and units | Demo v0.1 confirmed (`series/*.json`, dekads) |
+| Reporting-period metadata | Period IDs, start/end dates, labels | Demo v0.1 confirmed (dekads) |
+| Dataset source information | Provider, product, version, citation, license | Demo v0.1 partial (`meta.sources`) |
+| Spatial and temporal resolution | Resolution, coverage, cadence | Demo v0.1 partial (dekad cadence) |
+| Validation data | Reference data and approved statistics | Demo skeleton (`validation.csv`); census rows pending |
 
 ### Interface documentation requirements
 
@@ -816,23 +850,21 @@ Do not invent these fields. Add them only after the team confirms the contract.
 - Errors and partial responses have defined UI behavior.
 - No API keys or secrets in the frontend.
 
-### Provisional file examples (not requirements)
+### Confirmed demo files (v0.1)
 
-The project guide mentions possible static files. These are **illustrative examples only**, not confirmed integration requirements:
+- `data/meta.json` — `mode`, `contract_version`, `generated_at`, `dekads`, `thresholds`, `sources`, district/unit counts.
+- `data/districts.geojson` — district features with `district_id`, `name_en`/`name_ur`/`name_ps`, `status`, `deficit_mm` and hectares.
+- `data/ucs/<district_id>.geojson` — ADM3 tehsil features with `uc_id`, `uc_name_en`, `district_id` and hectares.
+- `data/series/<unit_id>.json` — `dekads[]` of `{start, end, et_mm, rain_mm, deficit_mm, status}`, plus `sources` and `generated_at`.
+- `data/validation.csv` — census-vs-atlas rows (census values still to be entered).
 
-- `data/districts.geojson`
-- `data/ucs/<district_id>.geojson`
-- `data/series/<uc_id>.json`
-- `data/meta.json`
-- `data/validation.csv`
-
-Actual paths, names, schemas, and delivery method must be confirmed with the backend/data lead.
+Field names, units, identifiers and missing-data behavior are authoritative in `docs/data-contract.md`. The production data delivery method (static files vs API) is still to be confirmed (Q-03/Q-04).
 
 ---
 
 ## 9. Quality and Deployment Checklist
 
-No Atlas implementation exists yet, so no item below is verified. Record actual results when each item is tested.
+This checklist covers the Phase 1 foundation. Only statically verifiable items are ticked; browser/interaction items remain unchecked and must be tested in a real browser before Phase 5 sign-off.
 
 ### Functionality
 
@@ -845,7 +877,7 @@ No Atlas implementation exists yet, so no item below is verified. Record actual 
 - [ ] Language switching works.
 - [ ] CSV exports work where supported.
 
-**Status:** Not verified — no Atlas implementation exists.
+**Status:** Not verified in a browser — the Atlas, Methods page, language switching and CSV export are implemented on `site/` but only statically/served-checked.
 
 ### Data integrity
 
@@ -856,7 +888,7 @@ No Atlas implementation exists yet, so no item below is verified. Record actual 
 - [ ] Correct geographic identifiers.
 - [ ] Clear missing-data behavior.
 
-**Status:** Not verified — no Atlas data layer exists.
+**Status:** Not verified — the demo data layer (`data-service.js`) exists but has not been browser-audited. No production data.
 
 ### Responsive design
 
@@ -866,7 +898,7 @@ No Atlas implementation exists yet, so no item below is verified. Record actual 
 - [ ] Urdu RTL verified.
 - [ ] Pashto RTL verified.
 
-**Status:** Not verified — no Atlas interface exists.
+**Status:** Not verified — the responsive foundation and RTL direction switching are implemented; browser checks at target widths and in Urdu/Pashto are outstanding.
 
 ### Accessibility
 
@@ -877,7 +909,7 @@ No Atlas implementation exists yet, so no item below is verified. Record actual 
 - [ ] Accessible forms and controls.
 - [ ] Non-color-only status indicators.
 
-**Status:** Not verified — no Atlas interface exists.
+**Status:** Not verified — requires a browser/keyboard/contrast audit. Focus styles and `sr-only` utilities exist in `base.css`; semantic markup is partially in place.
 
 ### Performance
 
@@ -887,17 +919,17 @@ No Atlas implementation exists yet, so no item below is verified. Record actual 
 - [ ] Optimized assets.
 - [ ] No unnecessary dependencies.
 
-**Status:** Not verified — nothing to measure.
+**Status:** Not verified — no performance measurement has been performed.
 
 ### Deployment
 
 - [ ] GitHub Pages compatibility.
-- [ ] Correct relative paths.
-- [ ] Direct page loading.
-- [ ] Refresh behavior.
-- [ ] Static hosting compatibility.
+- [x] Correct relative paths.
+- [x] Direct page loading.
+- [x] Refresh behavior.
+- [x] Static hosting compatibility.
 
-**Status:** Not verified — no deployment configuration exists.
+**Status:** Relative paths, direct page loading and static hosting verified locally over `python -m http.server` (all `site/` assets and `data/` fetches returned 200). Live GitHub Pages deploy not yet exercised.
 
 ---
 
@@ -948,8 +980,8 @@ When completing meaningful work:
 | ID | Dependency | Needed by | Impact if missing | Owner | Status |
 |---|---|---|---|---|---|
 | D-01 | Admin removal of legacy prototype files | Phase 1 | Prevents a clean baseline and risks mixing prototype with Atlas | Project admin | Resolved — removed 2026-11-14 |
-| D-02 | Confirmed frontend architecture and folder layout | Phase 1 | Rework and inconsistent modules | Frontend lead + team | Open |
-| D-03 | Confirmed backend/data contract | Phase 1–3 | UI cannot bind to real data; risk of invented schemas | Backend/data lead | Open |
+| D-02 | Confirmed frontend architecture and folder layout | Phase 1 | Rework and inconsistent modules | Frontend lead + team | Resolved — settled on the team's `site/` app; documented in section 4 |
+| D-03 | Confirmed backend/data contract | Phase 1–3 | UI cannot bind to real data; risk of invented schemas | Backend/data lead | Partial — demo v0.1 exists (`docs/data-contract.md`); production pending |
 | D-04 | Verified administrative boundaries for KP | Phase 2 | Atlas map cannot render real geography | Data lead | Open |
 | D-05 | Dataset selection and KP-coverage verification | Phase 2–3 | Risk of unusable or misleading layers | Science/data leads | Open |
 | D-06 | Metadata: periods, units, resolution, coverage, thresholds | Phase 2–4 | Risk of fabricated periods and classifications | Data/science leads | Open |
@@ -970,8 +1002,8 @@ Update a row to `Resolved` only when the real artifact has been received and ins
 |---|---|---|---|
 | Q-01 | Which candidate datasets are actually available and suitable for KP? | Phase 2 | Do not build layers; hold dataset-dependent work |
 | Q-02 | What exact products, versions, periods, and resolutions are confirmed? | Phase 2–3 | Display nothing until verified metadata exists |
-| Q-03 | Will the backend provide precomputed static files or a live API? | Phase 1 | Build only against the data-service boundary; assume nothing |
-| Q-04 | What is the final data contract and file/endpoint naming? | Phase 1–3 | Keep all interfaces marked pending |
+| Q-03 | Will the backend provide precomputed static files or a live API? | Phase 1 | Partially answered — demo ships static files under `data/`; production delivery method still pending |
+| Q-04 | What is the final data contract and file/endpoint naming? | Phase 1–3 | Partially answered — `docs/data-contract.md` v0.1 covers the demo; production schema pending |
 | Q-05 | Which administrative levels and boundary dataset are authoritative? | Phase 2 | Do not hardcode names, counts, or geometries |
 | Q-06 | Which indicators, reporting periods, and units are in scope? | Phase 3 | Do not invent indicators or periods |
 | Q-07 | What CSV exports are required and what should they contain? | Phase 3 | Match displayed data; confirm before release |
@@ -987,14 +1019,14 @@ The following existed in the repository or its history but belong to an earlier 
 
 | Item | Current state | Decision |
 |---|---|---|
-| `index.html` | Legacy Fieldnotes/NASA prototype landing and dashboard (1,035 lines) | Removed 2026-11-14; do not reuse as Atlas foundation; no phase credit |
-| `indexes.html` | Legacy dashboard copy | Removed 2026-11-14; no phase credit |
-| `README.md` | Describes the earlier NASA Earth observation prototype | To be rewritten for the Atlas in Phase 1 |
-| `feature/index-page` | Old landing-page branch | Disposable |
-| `feature/unified-index` | Old merged-prototype branch and PR #3 | Disposable |
+| `index.html` | Legacy Fieldnotes/NASA prototype landing and dashboard (1,035 lines) | Removed 2026-11-14 (upstream PR #6, fork PR #1); do not reuse as Atlas foundation; no phase credit |
+| `indexes.html` | Legacy dashboard copy | Removed 2026-11-14 (fork PR #1); no phase credit |
+| `README.md` | Previously described the earlier NASA Earth observation prototype | Rewritten by the team for the Atlas (local preview, pipeline, deploy) |
+| `feature/index-page` | Old landing-page branch | Deleted locally; disposable |
+| `feature/unified-index` | Old merged-prototype branch and PR #3 | Deleted locally; disposable |
 | Existing PRs and upstream history | Prototype work | Not part of the Atlas source of truth |
 
-The legacy files have been removed, so Phase 1 implementation may proceed. Do not reintroduce prototype code as Atlas foundation.
+The legacy prototype files were removed on 2026-11-14 (legacy-removal PRs #1/#5/#6; #5 superseded by #6). The team's `site/` frontend, not the prototype, is the Atlas source of truth. Do not reintroduce prototype code as Atlas foundation.
 
 ---
 
@@ -1005,6 +1037,8 @@ The legacy files have been removed, so Phase 1 implementation may proceed. Do no
 | 2026-11-14 | Created `AGENTS.md` after repository inspection. Recorded all phases as Not Started (0%) because no KP Open Farm Atlas implementation exists. Registered legacy prototype files and external dependencies. | OpenCode, on behalf of the frontend owner |
 | 2026-11-14 | Updated `AGENTS.md` to the broader agricultural and environmental Atlas identity; replaced the water-balance-only framing and old phase roadmap; added the candidate dataset inventory, team responsibilities, verified-vs-planned architecture, permanent rule categories, expanded tracker evidence, integration contract, quality checklist, and 15 OpenCode session instructions. Progress remains 0% with all phases Not Started. | OpenCode, on behalf of the frontend owner |
 | 2026-11-14 | Removed legacy prototype files `index.html` and `indexes.html` from the working tree; confirmed clean-slate baseline. Resolved dependency D-01, updated the repository-state table, legacy register, Phase 1 roadmap and tracker, and set Phase 1 to In Progress 7% and overall progress to 1%. | OpenCode, on behalf of the frontend owner |
+| 2026-11-14 | Merged upstream `505b783` into `main` (`b5fcb5e`); confirmed the team's `site/` app, `data/` demo contract v0.1, `docs/data-contract.md`, `docs/methods.md`, `pipeline/make_snapshot.py`, `scripts/serve.sh`, and `deploy-pages.yml` as the real repository state. Resolved D-02; recorded the demo contract under D-03/Q-03/Q-04. Corrected the sub-district level to tehsil (geoBoundaries ADM3) and district count to 31. | OpenCode, on behalf of the frontend owner |
+| 2026-11-14 | Phase 1 foundation implemented on branch `feature/phase-1-foundation`: split `site/css/style.css` into `tokens/base/layout/components/responsive`; extracted `site/js/config.js`, `utils.js`, `services/{state,i18n,data-service,csv,motion}.js` and `components/{legend,states}.js`; rewrote `app.js` as a page controller; vendored Anime.js 3.2.2 at `site/vendor/anime.min.js`; updated both HTML pages. Static verification passed (`node --check`, JSON parse, CSS brace balance, local HTTP smoke test). Phase 1 → 70%, overall → 14%. Browser responsive/RTL verification still pending. | OpenCode, on behalf of the frontend owner |
 
 ---
 
@@ -1013,7 +1047,8 @@ The legacy files have been removed, so Phase 1 implementation may proceed. Do no
 | Term | Meaning |
 |---|---|
 | **Atlas** | The KP Open Farm Atlas website and its interactive geographic experience |
-| **Administrative area** | A province, district, Union Council, or equivalent official geographic unit |
+| **Administrative area** | A province, district, tehsil, or equivalent official geographic unit |
+| **Tehsil** | A sub-district administrative unit; in this project the geoBoundaries ADM3 level (labelled "union council (tehsil)" in the UI, but not a Union Council boundary) |
 | **Aggregate** | A value summarizing an entire administrative area, not a single farm |
 | **Dataset** | A confirmed source of observations or derived information used by the Atlas |
 | **Product** | A specific version or collection within a dataset |
