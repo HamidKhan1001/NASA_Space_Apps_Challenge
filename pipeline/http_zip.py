@@ -48,6 +48,12 @@ class HttpFile(io.RawIOBase):
             self.pos = self.size + offset
         return self.pos
 
+    def readinto(self, buf):
+        # io.BufferedReader talks to RawIOBase through readinto, not read
+        data = self.read(len(buf))
+        buf[:len(data)] = data
+        return len(data)
+
     def read(self, n=-1):
         if n is None or n < 0:
             n = self.size - self.pos

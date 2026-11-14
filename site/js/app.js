@@ -27,6 +27,8 @@
   var meta = null, strings = {}, districts = null;
   var ucCache = {}, seriesCache = {};
   var map, districtLayer = null, ucLayer = null, plotlyPromise = null, firstFit = true;
+  var baseLayers = {}, labelOverlay = null, activeBase = localStorage.getItem('atlas.base') || 'light';
+  var showLabels = localStorage.getItem('atlas.labels') !== 'off';
   var legendOpen = localStorage.getItem('atlas.legend') !== 'closed';
 
   // ------------------------------------------------------------------ helpers
@@ -127,14 +129,77 @@
   function demandLabel() { return meta.et_method === 'wapor_aeti' ? t('demand_actual') : t('demand_ref'); }
 
   // ------------------------------------------------------------------ map
+  var ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
+  var BASES_TILE = {
+    light: { url: ESRI + 'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', max: 16, labels: true,
+             attr: 'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors' },
+    imagery: { url: ESRI + 'World_Imagery/MapServer/tile/{z}/{y}/{x}', max: 17, labels: true,
+               attr: 'Imagery &copy; Esri, Maxar, Earthstar Geographics' },
+    terrain: { url: ESRI + 'World_Topo_Map/MapServer/tile/{z}/{y}/{x}', max: 16, labels: false,
+               attr: 'Tiles &copy; Esri, USGS, NOAA' }
+  };
+  var LABEL_TILE = ESRI + 'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+
+  function setBase(key) {
+    activeBase = BASES_TILE[key] ? key : 'light';
+    localStorage.setItem('atlas.base', activeBase);
+    Object.keys(baseLayers).forEach(function (k) {
+      if (map.hasLayer(baseLayers[k])) map.removeLayer(baseLayers[k]);
+    });
+    if (!baseLayers[activeBase]) {
+      var cfg = BASES_TILE[activeBase];
+      baseLayers[activeBase] = L.tileLayer(cfg.url, { attribution: cfg.attr, maxZoom: cfg.max });
+    }
+    baseLayers[activeBase].addTo(map).bringToBack();
+    if (labelOverlay) map.removeLayer(labelOverlay);
+    if (BASES_TILE[activeBase].labels) {
+      labelOverlay = L.tileLayer(LABEL_TILE, { maxZoom: 16, opacity: activeBase === 'imagery' ? 0.9 : 1,
+        pane: 'shadowPane', attribution: '' });
+      labelOverlay.addTo(map);
+    }
+    document.body.classList.toggle('dark-base', activeBase === 'imagery');
+    var box = qs('baseSwitch');
+    if (box) Array.prototype.forEach.call(box.children, function (b) {
+      b.classList.toggle('on', b.getAttribute('data-base') === activeBase);
+    });
+    restyle();
+  }
+
+  function buildMapControls() {
+    var box = qs('baseSwitch');
+    box.innerHTML = '';
+    [['light', 'map'], ['imagery', 'satellite'], ['terrain', 'layers']].forEach(function (b) {
+      box.appendChild(el('button', { type: 'button', 'data-base': b[0], title: t('base_' + b[0]),
+        'aria-label': t('base_' + b[0]), onclick: function () { setBase(b[0]); } }, [icon(b[1], 'icon-sm')]));
+    });
+    Array.prototype.forEach.call(box.children, function (b) {
+      b.classList.toggle('on', b.getAttribute('data-base') === activeBase);
+    });
+    var lab = qs('labelToggle');
+    lab.setAttribute('title', t('toggle_labels'));
+    lab.setAttribute('aria-label', t('toggle_labels'));
+    lab.classList.toggle('on', showLabels);
+    lab.addEventListener('click', function () {
+      showLabels = !showLabels;
+      localStorage.setItem('atlas.labels', showLabels ? 'on' : 'off');
+      lab.classList.toggle('on', showLabels);
+      rerender(true);
+    });
+  }
+
   function initMap() {
-    map = L.map('map', { zoomControl: true, attributionControl: true }).setView([34.2, 71.8], 7);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors', maxZoom: 14
-    }).addTo(map);
+    map = L.map('map', { zoomControl: false, attributionControl: true, minZoom: 5 }).setView([34.2, 71.8], 7);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
+    map.on('zoomend moveend', updateLabels);
+    setBase(activeBase);
     qs('mapToggle').addEventListener('click', function () {
       showPanel(document.body.classList.contains('show-map'));
+    });
+  }
+  function restyle() {
+    if (districtLayer) districtLayer.setStyle(function (f) {
+      return styleFor(f.properties._st || f.properties.status, state.level !== 'province');
     });
   }
   function fit(bounds, pad) {
@@ -143,9 +208,49 @@
     firstFit = false;
   }
   function styleFor(status, dim) {
-    return { color: '#ffffff', weight: dim ? 0.7 : 1.1, opacity: dim ? 0.6 : 1,
-             fillColor: COLORS[status] || COLORS.nodata, fillOpacity: dim ? 0.22 : 0.8 };
+    var dark = activeBase === 'imagery';
+    return { color: dark ? '#0f141b' : '#ffffff', weight: dim ? 0.7 : 1.1, opacity: dim ? 0.6 : 1,
+             fillColor: COLORS[status] || COLORS.nodata, fillOpacity: dim ? 0.2 : (dark ? 0.62 : 0.8) };
   }
+  function hoverable(layer, baseStyle) {
+    layer.on('mouseover', function () {
+      layer.setStyle({ weight: 2.6, color: '#0f141b', fillOpacity: 0.9 });
+      if (layer.bringToFront) layer.bringToFront();
+    });
+    layer.on('mouseout', function () { layer.setStyle(baseStyle()); });
+  }
+  var labelled = [];
+  function addLabel(layer, html) {
+    if (!showLabels) {
+      layer.bindTooltip(html, { sticky: true, className: 'map-label hover-only', opacity: 1 });
+      return;
+    }
+    layer._atlasLabel = html;
+    labelled.push(layer);
+  }
+  // Leaflet has no label collision handling, so only label polygons that are
+  // large enough on screen to hold the text. Re-evaluated on every zoom and pan.
+  function updateLabels() {
+    if (!showLabels) return;
+    var minW = 64, minH = 30;
+    labelled.forEach(function (layer) {
+      if (!layer._atlasLabel || !map.hasLayer(layer)) return;
+      var b = layer.getBounds();
+      var nw = map.latLngToContainerPoint(b.getNorthWest());
+      var se = map.latLngToContainerPoint(b.getSouthEast());
+      var big = (se.x - nw.x) >= minW && (se.y - nw.y) >= minH;
+      var onScreen = map.getBounds().intersects(b);
+      if (big && onScreen) {
+        if (!layer.getTooltip()) {
+          layer.bindTooltip(layer._atlasLabel, { permanent: true, direction: 'center',
+            className: 'map-label', opacity: 1, interactive: false });
+        }
+      } else if (layer.getTooltip()) {
+        layer.unbindTooltip();
+      }
+    });
+  }
+  function resetLabels() { labelled = []; }
   function quantiles(values) {
     var v = values.filter(function (x) { return x != null; }).sort(function (a, b) { return a - b; });
     if (!v.length) return null;
@@ -162,25 +267,31 @@
 
   function drawDistricts(statusById) {
     if (districtLayer) map.removeLayer(districtLayer);
+    resetLabels();
     var dim = state.level !== 'province';
     districtLayer = L.geoJSON(districts, {
       style: function (f) { return styleFor(statusById ? statusById[f.properties.district_id] : f.properties.status, dim); },
       onEachFeature: function (f, layer) {
         var p = f.properties;
-        layer.bindTooltip(function () {
-          var st = statusById ? statusById[p.district_id] : p.status;
-          return tooltip(nameOf(p), t('status_' + st));
-        }, { sticky: true });
+        p._st = statusById ? statusById[p.district_id] : p.status;
+        if (!dim) {
+          var def = isLatest() ? p.deficit_mm : null;
+          addLabel(layer, '<span class="ml-n">' + nameOf(p) + '</span>' +
+            (def != null ? '<span class="ml-v">' + Math.round(def) + ' ' + t('mm') + '</span>' : ''));
+          hoverable(layer, function () { return styleFor(p._st, false); });
+        }
         layer.on('click', function () { openDistrict(p.district_id); });
       }
     }).addTo(map);
     if (dim && ucLayer) ucLayer.bringToFront();
+    updateLabels();
   }
 
   function drawUCs(fc, statusById) {
     if (ucLayer) map.removeLayer(ucLayer);
     var breaks = state.layer !== 'status'
       ? quantiles(fc.features.map(function (f) { return f.properties[state.layer]; })) : null;
+    /* eslint-disable no-unused-vars */
     ucLayer = L.geoJSON(fc, {
       style: function (f) {
         var p = f.properties;
@@ -189,17 +300,24 @@
       },
       onEachFeature: function (f, layer) {
         var p = f.properties;
-        layer.bindTooltip(function () {
-          var st = statusById ? statusById[p.uc_id] : p.status;
-          var sub = state.layer === 'status' ? t('status_' + st)
-            : fmtInt(p[state.layer]) + ' ' + t('ha');
-          return tooltip(p.uc_name_en, sub);
-        }, { sticky: true });
+        var st = statusById ? statusById[p.uc_id] : p.status;
+        var val = state.layer === 'status'
+          ? (isLatest() && p.deficit_mm != null ? Math.round(p.deficit_mm) + ' ' + t('mm') : '')
+          : (p[state.layer] == null ? '' : fmtInt(p[state.layer]) + ' ' + t('ha'));
+        addLabel(layer, '<span class="ml-n">' + p.uc_name_en + '</span>' +
+          (val ? '<span class="ml-v">' + val + '</span>' : ''));
+        var base = function () {
+          if (state.layer === 'status') return styleFor(st, false);
+          return { color: activeBase === 'imagery' ? '#0f141b' : '#ffffff', weight: 1.1,
+                   fillColor: haColor(p[state.layer], breaks), fillOpacity: 0.88 };
+        };
+        hoverable(layer, base);
         layer.on('click', function () { openUC(p.district_id, p.uc_id); });
-        if (state.ucId === p.uc_id) layer.setStyle({ color: '#0f141b', weight: 2.6 });
+        if (state.ucId === p.uc_id) layer.setStyle({ color: '#0f141b', weight: 2.8, fillOpacity: 0.92 });
       }
     }).addTo(map);
     ucLayer.bringToFront();
+    updateLabels();
     return breaks;
   }
 
@@ -653,6 +771,7 @@
       return getJSON('districts.geojson');
     }).then(function (fc) {
       districts = fc;
+      buildMapControls();
       applyLang();
       qs('langSelect').addEventListener('change', function (e) { state.lang = e.target.value; applyLang(); rerender(true); });
       qs('dekadSelect').addEventListener('change', function (e) { state.dekadIndex = Number(e.target.value); rerender(true); });

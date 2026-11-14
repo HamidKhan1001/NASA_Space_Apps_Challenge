@@ -71,7 +71,11 @@
     "generated": "Generated {ts}",
     "footer_sources": "NASA POWER · ESA WorldCover · geoBoundaries",
     "show_map": "Map",
-    "show_details": "Details"
+    "show_details": "Details",
+    "base_light": "Plain map",
+    "base_imagery": "Satellite imagery",
+    "base_terrain": "Terrain",
+    "toggle_labels": "Show names on the map"
   },
   "ur": {
     "app_title": "کے پی اوپن فارم اٹلس",
@@ -144,7 +148,11 @@
     "generated": "تیار شدہ {ts}",
     "footer_sources": "NASA POWER · ESA WorldCover · geoBoundaries",
     "show_map": "نقشہ",
-    "show_details": "تفصیل"
+    "show_details": "تفصیل",
+    "base_light": "سادہ نقشہ",
+    "base_imagery": "سیٹلائٹ تصویر",
+    "base_terrain": "خطہ",
+    "toggle_labels": "نقشے پر نام دکھائیں"
   },
   "ps": {
     "app_title": "کې پي اوپن فارم اټلس",
@@ -217,6 +225,10 @@
     "generated": "جوړ شوی {ts}",
     "footer_sources": "NASA POWER · ESA WorldCover · geoBoundaries",
     "show_map": "نقشه",
-    "show_details": "تفصیل"
+    "show_details": "تفصیل",
+    "base_light": "ساده نقشه",
+    "base_imagery": "سپوږمکۍ انځور",
+    "base_terrain": "ځمکنۍ بڼه",
+    "toggle_labels": "په نقشه کې نومونه ښکاره کړه"
   }
 }

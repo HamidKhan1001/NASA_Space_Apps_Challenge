@@ -27,7 +27,7 @@ import json
 import os
 import re
 import sys
-import urllib.request
+import requests
 
 from geo import centroid, point_in_geom, round_coords
 
@@ -44,7 +44,10 @@ def fetch(lvl):
         os.makedirs(RAW, exist_ok=True)
         url = GB.format(lvl=lvl)
         print(f"downloading {url}")
-        urllib.request.urlretrieve(url, path)
+        r = requests.get(url, timeout=300)
+        r.raise_for_status()
+        with open(path, "wb") as fh:
+            fh.write(r.content)
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)["features"]
 

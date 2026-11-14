@@ -53,6 +53,12 @@
 
   <div class="stage">
     <div id="map" role="application" aria-label="Map of Khyber Pakhtunkhwa"></div>
+    <div class="map-tools">
+      <div class="seg" id="baseSwitch" role="group" aria-label="Base map"></div>
+      <button class="seg-btn solo on" id="labelToggle" type="button">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-info"/></svg>
+      </button>
+    </div>
     <div class="legend" id="legend" aria-live="polite"></div>
     <div class="loading" id="loading"><span class="spinner"></span><span data-i18n="loading">Loading…</span></div>
     <aside class="panel" id="panel" aria-live="polite"></aside>
