@@ -1,118 +1,56 @@
-/* KP Open Farm Atlas: static site that reads /data (see docs/data-contract.md).
-   Three screens: province -> district -> union council (tehsil). No build step. */
+/* KP Open Farm Atlas: page controller for index.html.
+   Three screens: province -> district -> union council (tehsil). All network,
+   formatting, state and translation work is delegated to Atlas services; this
+   file only wires them to the map and panel. See docs/data-contract.md. */
 (function () {
   'use strict';
 
-  var DATA = 'data/';
-  var COLORS = { green: '#2e7d32', amber: '#f9a825', red: '#c62828', nodata: '#9e9e9e' };
-  var HA_LAYERS = ['crop_ha', 'wheat_ha', 'maize_ha', 'irrigated_ha'];
+  var config = Atlas.config;
+  var util = Atlas.util;
+  var state = Atlas.state;
+  var t = Atlas.i18n.t;
+  var data = Atlas.data;
+  var states = Atlas.components.states;
+  var legend = Atlas.components.legend;
 
-  var state = {
-    lang: localStorage.getItem('atlas.lang') || 'en',
-    level: 'province', districtId: null, ucId: null,
-    dekadIndex: null,           // index into meta.dekads, latest by default
-    layer: 'status'             // status | crop_ha | wheat_ha | maize_ha | irrigated_ha
-  };
-  var meta = null, strings = {}, districts = null;
-  var ucCache = {}, seriesCache = {};
+  var COLORS = config.colors;
+  var HA_LAYERS = config.haLayers;
+  var el = util.el;
+  var qs = util.qs;
+
+  var meta = null, districts = null;
   var map, districtLayer = null, ucLayer = null, plotlyPromise = null, firstRender = true;
+
   function fit(bounds, pad) {
     map.invalidateSize();
     map.fitBounds(bounds, { padding: [pad, pad], animate: !firstRender, duration: 0.6 });
     firstRender = false;
   }
 
-  // ------------------------------------------------------------------ utilities
-  function qs(id) { return document.getElementById(id); }
-  function t(key, vars) {
-    var s = (strings[state.lang] && strings[state.lang][key]) || (strings.en && strings.en[key]) || key;
-    return s.replace(/\{(\w+)\}/g, function (_, k) { return vars && vars[k] != null ? vars[k] : ''; });
-  }
-  function name(props) { return props['name_' + state.lang] || props.name_en; }
-  function fmtInt(n) { return n == null ? '–' : Number(n).toLocaleString('en-US'); }
-  function fmtMm(n) { return n == null ? '–' : (Math.round(n * 10) / 10).toLocaleString('en-US'); }
-  function fmtDate(iso) {
-    var d = new Date(iso + 'T00:00:00Z');
-    return d.toLocaleDateString(state.lang === 'en' ? 'en-GB' : state.lang === 'ur' ? 'ur-PK' : 'ps-AF', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-  }
-  function dekadLabel(d) { return fmtDate(d.start) + ' – ' + fmtDate(d.end); }
-  function version() { return meta ? encodeURIComponent(meta.generated_at) : Math.floor(Date.now() / 3.6e6); }
-  // Offline fallback: when a fetch fails (dead Wi-Fi, file:// demo) load js/data-snapshot.js once
-  // and serve every later request from it. The snapshot is never loaded on the normal path.
-  var snapshotPromise = null;
-  function snapshot() {
-    if (window.ATLAS_SNAPSHOT) return Promise.resolve(window.ATLAS_SNAPSHOT);
-    if (!snapshotPromise) snapshotPromise = new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = 'js/data-snapshot.js'; s.onload = function () { resolve(window.ATLAS_SNAPSHOT); }; s.onerror = reject;
-      document.head.appendChild(s);
-    });
-    return snapshotPromise;
-  }
-  function fromSnapshot(path) {
-    return snapshot().then(function (snap) {
-      if (!snap || !(path in snap)) throw new Error('not in snapshot: ' + path);
-      qs('offlineBadge').hidden = false;
-      return JSON.parse(JSON.stringify(snap[path]));
-    });
-  }
-  function getJSON(path, bust) {
-    if (window.ATLAS_SNAPSHOT) return fromSnapshot(path);
-    return fetch(DATA + path + '?v=' + (bust || version()), { cache: 'no-cache' }).then(function (r) {
-      if (!r.ok) throw new Error(r.status + ' ' + path);
-      return r.json();
-    }).catch(function (err) { return fromSnapshot(path).catch(function () { throw err; }); });
-  }
-  function series(id) {
-    if (!seriesCache[id]) {
-      seriesCache[id] = getJSON('series/' + id + '.json').catch(function () { return null; });
-    }
-    return seriesCache[id];
-  }
+  function fmtDate(iso) { return util.fmtDate(iso, state.lang); }
+  function fmtInt(n) { return util.fmtInt(n); }
+  function fmtMm(n) { return util.fmtMm(n); }
+  function dekadLabel(d) { return util.dekadLabel(d, state.lang); }
+  function name(props) { return Atlas.i18n.name(props); }
+
   function statusAt(ser, idx) {
     if (!ser || !ser.dekads[idx]) return { status: 'nodata', deficit_mm: null, et_mm: null, rain_mm: null };
     return ser.dekads[idx];
   }
   function isLatest() { return state.dekadIndex === meta.dekads.length - 1; }
-  function el(tag, attrs, children) {
-    var e = document.createElement(tag);
-    if (attrs) Object.keys(attrs).forEach(function (k) {
-      if (k === 'text') e.textContent = attrs[k];
-      else if (k === 'html') e.innerHTML = attrs[k];
-      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]);
-      else e.setAttribute(k, attrs[k]);
-    });
-    (children || []).forEach(function (c) { if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
-    return e;
-  }
-  function setLoading(on) { qs('loading').hidden = !on; }
-  // On phones the panel is full-screen; showPanel(false) reveals the map, a floating button flips back.
+
+  // On phones the panel is full-screen; showPanel(false) reveals the map.
   function showPanel(on) {
     document.body.classList.toggle('show-map', !on);
     qs('mapToggle').textContent = on ? t('show_map') : t('show_details');
     if (!on && map) setTimeout(function () { map.invalidateSize(); }, 50);
   }
 
-  // ------------------------------------------------------------------ colours
-  function quantiles(values) {
-    var v = values.filter(function (x) { return x != null; }).sort(function (a, b) { return a - b; });
-    if (!v.length) return [0, 0, 0, 0];
-    return [0.2, 0.4, 0.6, 0.8].map(function (q) { return v[Math.min(v.length - 1, Math.floor(q * v.length))]; });
-  }
-  var RAMP = ['#f1f5e9', '#c5dbb3', '#8fbf86', '#4e9a5a', '#1b5e20'];
-  function haColor(value, breaks) {
-    if (value == null) return COLORS.nodata;
-    for (var i = 0; i < breaks.length; i++) if (value <= breaks[i]) return RAMP[i];
-    return RAMP[4];
-  }
-
   // ------------------------------------------------------------------ map
   function initMap() {
     map = L.map('map', { zoomControl: true, attributionControl: true, preferCanvas: false }).setView([34.0, 71.5], 7);
-    // Keyless, light basemap. Tiles are optional: polygons carry the information, so a dead
-    // connection only loses the background (offline demo still works).
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors', maxZoom: 14, opacity: 0.9
+    L.tileLayer(config.tile.url, {
+      attribution: config.tile.attribution, maxZoom: config.tile.maxZoom, opacity: config.tile.opacity
     }).addTo(map);
     L.control.scale({ imperial: false, position: 'bottomright' }).addTo(map);
     qs('mapToggle').addEventListener('click', function () { showPanel(document.body.classList.contains('show-map')); });
@@ -143,12 +81,12 @@
 
   function drawUCs(fc, statusById) {
     if (ucLayer) map.removeLayer(ucLayer);
-    var breaks = state.layer !== 'status' ? quantiles(fc.features.map(function (f) { return f.properties[state.layer]; })) : null;
+    var breaks = state.layer !== 'status' ? util.quantiles(fc.features.map(function (f) { return f.properties[state.layer]; })) : null;
     ucLayer = L.geoJSON(fc, {
       style: function (f) {
         var p = f.properties;
         if (state.layer === 'status') return styleFor(statusById ? statusById[p.uc_id] : p.status, false);
-        return { color: '#ffffff', weight: 1.2, fillColor: haColor(p[state.layer], breaks), fillOpacity: 0.85 };
+        return { color: '#ffffff', weight: 1.2, fillColor: util.haColor(p[state.layer], breaks), fillOpacity: 0.85 };
       },
       onEachFeature: function (f, layer) {
         var p = f.properties;
@@ -165,48 +103,39 @@
     return breaks;
   }
 
-  // statuses for the selected dekad; null means "use what the polygons carry" (latest)
+  // Statuses for the selected dekad; null means "use what the polygons carry".
   function statusesFor(features, idKey) {
     if (isLatest()) return Promise.resolve(null);
-    return Promise.all(features.map(function (f) { return series(f.properties[idKey]); })).then(function (all) {
+    return Promise.all(features.map(function (f) { return data.series(f.properties[idKey]); })).then(function (all) {
       var out = {};
       all.forEach(function (s, i) { out[features[i].properties[idKey]] = statusAt(s, state.dekadIndex).status; });
       return out;
     });
   }
 
-  // ------------------------------------------------------------------ legend
   function renderLegend(breaks) {
-    var box = qs('legend'); box.innerHTML = '';
-    var d = meta.dekads[state.dekadIndex];
-    if (state.layer === 'status' || state.level === 'province') {
-      box.appendChild(el('h3', { text: t('legend_title', { dekad: dekadLabel(d) }) }));
-      var thr = meta.thresholds;
-      [['green', t('legend_green')], ['amber', t('legend_amber', { max: thr.amber.max_deficit_mm })],
-       ['red', t('legend_red', { max: thr.amber.max_deficit_mm })], ['nodata', t('legend_nodata')]].forEach(function (r) {
-        box.appendChild(el('div', { 'class': 'row' }, [el('span', { 'class': 'sw', style: 'background:' + COLORS[r[0]] }), el('span', { text: r[1] })]));
-      });
-      box.appendChild(el('div', { 'class': 'note', text: t('legend_note') }));
-    } else {
-      box.appendChild(el('h3', { text: t('layer_' + state.layer) + ' · ' + t('ha') }));
-      box.appendChild(el('div', { 'class': 'ramp' }));
-      box.appendChild(el('div', { 'class': 'ramp-labels' }, [el('span', { text: fmtInt(0) }), el('span', { text: fmtInt(breaks && breaks[3]) + '+' })]));
-      box.appendChild(el('div', { 'class': 'note', text: t('layer_note') }));
-    }
+    legend.render({
+      node: qs('legend'),
+      level: state.level,
+      layer: state.layer,
+      dekad: meta.dekads[state.dekadIndex],
+      thresholds: meta.thresholds,
+      breaks: breaks
+    });
   }
 
   // ------------------------------------------------------------------ screens
   function openProvince() {
     state.level = 'province'; state.districtId = null; state.ucId = null; state.layer = 'status';
     if (ucLayer) { map.removeLayer(ucLayer); ucLayer = null; }
-    setLoading(true);
+    states.setLoading(true);
     statusesFor(districts.features, 'district_id').then(function (st) {
       drawDistricts(st);
       fit(districtLayer.getBounds(), 10);
       renderLegend();
       renderProvincePanel(st);
-      showPanel(window.innerWidth > 760);
-      setLoading(false);
+      showPanel(window.innerWidth > config.breakpoints.mobile);
+      states.setLoading(false);
     });
     history.replaceState(null, '', '#');
   }
@@ -234,19 +163,15 @@
     panel.appendChild(el('p', { 'class': 'muted', text: t('tap_district') }));
     panel.appendChild(list);
     panel.appendChild(sourcesBlock());
-  }
-
-  function loadUCs(did) {
-    if (!ucCache[did]) ucCache[did] = getJSON('ucs/' + did + '.geojson').catch(function () { return { type: 'FeatureCollection', features: [] }; });
-    return ucCache[did];
+    Atlas.motion.reveal(panel, { y: 10 });
   }
 
   function openDistrict(did, keepLayer) {
     state.level = 'district'; state.districtId = did; state.ucId = null;
     if (!keepLayer) state.layer = state.layer || 'status';
-    setLoading(true);
+    states.setLoading(true);
     var dFeature = districts.features.filter(function (f) { return f.properties.district_id === did; })[0];
-    Promise.all([loadUCs(did), series(did)]).then(function (res) {
+    Promise.all([data.ucs(did), data.series(did)]).then(function (res) {
       var fc = res[0], dser = res[1];
       return statusesFor(fc.features, 'uc_id').then(function (st) {
         drawDistricts(null);
@@ -255,7 +180,7 @@
         renderLegend(breaks);
         renderDistrictPanel(dFeature, fc, dser, st);
         if (!keepLayer) showPanel(true);
-        setLoading(false);
+        states.setLoading(false);
       });
     });
     history.replaceState(null, '', '#' + did);
@@ -263,7 +188,7 @@
 
   function renderDistrictPanel(dFeature, fc, dser, statusById) {
     var p = dFeature.properties, panel = qs('panel'); panel.innerHTML = '';
-    panel.appendChild(el('div', { 'class': 'crumbs' }, [el('button', { text: t('province'), onclick: openProvince }), el('span', { text: '›' }), el('span', { text: name(p) })]));
+    panel.appendChild(el('div', { 'class': 'crumbs' }, [el('button', { text: t('province'), onclick: openProvince }), el('span', { text: '\u203a' }), el('span', { text: name(p) })]));
     panel.appendChild(el('h2', { text: name(p) }));
     panel.appendChild(el('p', { 'class': 'sub', text: t('district_sub', { n: fc.features.length }) }));
     var cur = statusAt(dser, state.dekadIndex);
@@ -288,12 +213,13 @@
     panel.appendChild(list);
     panel.appendChild(actions(dser, p.district_id, name(p)));
     panel.appendChild(sourcesBlock(dser));
+    Atlas.motion.reveal(panel, { y: 10 });
   }
 
   function openUC(did, ucId) {
     state.level = 'uc'; state.districtId = did; state.ucId = ucId;
-    setLoading(true);
-    Promise.all([loadUCs(did), series(ucId)]).then(function (res) {
+    states.setLoading(true);
+    Promise.all([data.ucs(did), data.series(ucId)]).then(function (res) {
       var fc = res[0], ser = res[1];
       var f = fc.features.filter(function (x) { return x.properties.uc_id === ucId; })[0];
       if (!f) { openDistrict(did); return; }
@@ -303,8 +229,8 @@
         renderUCPanel(f, ser);
         showPanel(true);
         var layer = ucLayer.getLayers().filter(function (l) { return l.feature.properties.uc_id === ucId; })[0];
-        if (layer && window.innerWidth > 760) fit(layer.getBounds(), 40);
-        setLoading(false);
+        if (layer && window.innerWidth > config.breakpoints.mobile) fit(layer.getBounds(), 40);
+        states.setLoading(false);
       });
     });
     history.replaceState(null, '', '#' + ucId);
@@ -313,8 +239,8 @@
   function renderUCPanel(f, ser) {
     var p = f.properties, panel = qs('panel'); panel.innerHTML = '';
     panel.appendChild(el('div', { 'class': 'crumbs' }, [
-      el('button', { text: t('province'), onclick: openProvince }), el('span', { text: '›' }),
-      el('button', { text: name(p), onclick: function () { openDistrict(p.district_id); } }), el('span', { text: '›' }), el('span', { text: p.uc_name_en })]));
+      el('button', { text: t('province'), onclick: openProvince }), el('span', { text: '\u203a' }),
+      el('button', { text: name(p), onclick: function () { openDistrict(p.district_id); } }), el('span', { text: '\u203a' }), el('span', { text: p.uc_name_en })]));
     panel.appendChild(el('h2', { text: p.uc_name_en }));
     panel.appendChild(el('p', { 'class': 'sub', text: t('uc_sub', { district: name(p) }) }));
     var cur = statusAt(ser, state.dekadIndex);
@@ -328,6 +254,7 @@
     renderChart(chart, ser);
     panel.appendChild(actions(ser, p.uc_id, p.uc_name_en));
     panel.appendChild(sourcesBlock(ser));
+    Atlas.motion.reveal(panel, { y: 10 });
   }
 
   // ------------------------------------------------------------------ panel pieces
@@ -342,7 +269,7 @@
     var def = cur.deficit_mm;
     card.appendChild(el('div', { 'class': 'big', html: (def > 0 ? fmtMm(def) : fmtMm(Math.abs(def))) + ' <small>' + t('mm') + ' ' + (def > 0 ? t('deficit') : t('surplus')) + '</small>' }));
     card.appendChild(el('div', { 'class': 'what', text: t('status_sentence', { et: fmtMm(cur.et_mm), rain: fmtMm(cur.rain_mm), ha: fmtInt(p.irrigated_ha) }) }));
-    card.appendChild(el('div', { 'class': 'what', text: t('status_' + st) + ' · ' + thresholdText(st) }));
+    card.appendChild(el('div', { 'class': 'what', text: t('status_' + st) + ' \u00b7 ' + thresholdText(st) }));
     return card;
   }
   function thresholdText(st) {
@@ -371,18 +298,18 @@
   function actions(ser, id, label) {
     var box = el('div', { 'class': 'actions' });
     box.appendChild(el('button', { 'class': 'btn', text: t('download_csv'), onclick: function () { downloadCSV(ser, id, label); } }));
-    box.appendChild(el('a', { 'class': 'btn ghost', text: t('download_geojson'), href: DATA + (state.level === 'uc' ? 'ucs/' + state.districtId + '.geojson' : 'districts.geojson'), download: '' }));
+    box.appendChild(el('a', { 'class': 'btn ghost', text: t('download_geojson'), href: config.dataRoot + (state.level === 'uc' ? 'ucs/' + state.districtId + '.geojson' : 'districts.geojson'), download: '' }));
     return box;
   }
   function sourcesBlock(ser) {
     var s = meta.sources, box = el('div', { 'class': 'sources' });
     box.appendChild(el('div', { html: '<b>' + t('sources') + '</b>' }));
     ['crops', 'et', 'rain', 'boundaries'].forEach(function (k) {
-      var flag = s[k].status === 'live' ? '' : ' · ' + t('synthetic');
+      var flag = s[k].status === 'live' ? '' : ' \u00b7 ' + t('synthetic');
       box.appendChild(el('div', { text: s[k].name + flag }));
     });
     box.appendChild(el('div', { text: t('generated', { ts: (ser && ser.generated_at) || meta.generated_at }) }));
-    box.appendChild(el('div', {}, [el('a', { href: 'methods.html', text: t('methods') + ' →' })]));
+    box.appendChild(el('div', {}, [el('a', { href: 'methods.html', text: t('methods') + ' \u2192' })]));
     return box;
   }
 
@@ -391,7 +318,7 @@
     if (window.Plotly) return Promise.resolve();
     if (!plotlyPromise) plotlyPromise = new Promise(function (resolve, reject) {
       var s = document.createElement('script');
-      s.src = 'https://cdn.plot.ly/plotly-basic-2.35.2.min.js'; s.onload = resolve; s.onerror = reject; document.head.appendChild(s);
+      s.src = config.plotlyUrl; s.onload = resolve; s.onerror = reject; document.head.appendChild(s);
     });
     return plotlyPromise;
   }
@@ -422,29 +349,26 @@
   function downloadCSV(ser, id, label) {
     var rows = [['id', 'name', 'dekad_start', 'dekad_end', 'et_mm', 'rain_mm', 'deficit_mm', 'status']];
     (ser ? ser.dekads : []).forEach(function (d) { rows.push([id, label, d.start, d.end, d.et_mm, d.rain_mm, d.deficit_mm, d.status]); });
-    rows.push([]); rows.push(['# sources', ser ? Object.keys(ser.sources).map(function (k) { return k + ': ' + ser.sources[k]; }).join(' | ') : '']);
+    rows.push([]);
+    rows.push(['# sources', ser ? Object.keys(ser.sources).map(function (k) { return k + ': ' + ser.sources[k]; }).join(' | ') : '']);
     rows.push(['# generated_at', (ser && ser.generated_at) || meta.generated_at]);
-    var csv = rows.map(function (r) { return r.map(function (c) { return c == null ? '' : /[",\n]/.test(String(c)) ? '"' + String(c).replace(/"/g, '""') + '"' : c; }).join(','); }).join('\n');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'kp-atlas-' + id + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+    Atlas.csv.download('kp-atlas-' + id + '.csv', rows);
   }
 
   // ------------------------------------------------------------------ language, dekad, boot
   function applyLang() {
-    document.documentElement.lang = state.lang;
-    document.documentElement.dir = (state.lang === 'ur' || state.lang === 'ps') ? 'rtl' : 'ltr';
-    document.querySelectorAll('[data-i18n]').forEach(function (n) { n.textContent = t(n.getAttribute('data-i18n')); });
+    Atlas.state.setLang(state.lang);
+    Atlas.i18n.setLang(state.lang);
+    Atlas.i18n.apply(document);
     document.title = t('app_title');
     qs('langSelect').value = state.lang;
-    localStorage.setItem('atlas.lang', state.lang);
     fillDekads();
     qs('footGenerated').textContent = t('generated', { ts: meta.generated_at });
     qs('footSources').textContent = t('footer_sources');
   }
   function fillDekads() {
     var sel = qs('dekadSelect'); sel.innerHTML = '';
-    meta.dekads.forEach(function (d, i) { sel.appendChild(el('option', { value: i, text: dekadLabel(d) + (i === meta.dekads.length - 1 ? ' · ' + t('latest') : '') })); });
+    meta.dekads.forEach(function (d, i) { sel.appendChild(el('option', { value: i, text: dekadLabel(d) + (i === meta.dekads.length - 1 ? ' \u00b7 ' + t('latest') : '') })); });
     sel.value = state.dekadIndex;
   }
   function rerender() {
@@ -454,15 +378,17 @@
   }
 
   function boot() {
+    data.setOnOffline(function () { qs('offlineBadge').hidden = false; });
     initMap();
     Promise.all([
-      getJSON('meta.json', Math.floor(Date.now() / 3.6e6)),
-      fetch('strings.json?v=' + Math.floor(Date.now() / 3.6e6)).then(function (r) { return r.json(); }).catch(function () { return fromSnapshot('strings.json'); })
+      data.meta(),
+      Atlas.i18n.load()
     ]).then(function (res) {
-      meta = res[0]; strings = res[1];
+      meta = res[0];
+      data.setVersion(meta.generated_at);
       state.dekadIndex = meta.dekads.length - 1;
       qs('demoBadge').hidden = meta.mode === 'live';
-      return getJSON('districts.geojson');
+      return data.districts();
     }).then(function (fc) {
       districts = fc;
       applyLang();
@@ -473,8 +399,8 @@
       else if (hash && /^PK\.KP\.[A-Z]{3}$/.test(hash)) openDistrict(hash);
       else openProvince();
     }).catch(function (err) {
-      setLoading(false);
-      qs('panel').innerHTML = '<h2>Could not load data</h2><p class="muted">' + err.message + '</p><p>Check that <code>data/meta.json</code> is served next to this page (see README: scripts/serve.sh).</p>';
+      states.setLoading(false);
+      states.showError(qs('panel'), err);
     });
   }
   boot();
