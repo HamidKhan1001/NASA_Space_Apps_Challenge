@@ -9,9 +9,10 @@ pipeline/cache/
 __pycache__/
 *.pyc
 
-# site/data is populated by the deploy workflow (copy of /data); locally use scripts/serve.sh
+# site/data and site/docs are local symlinks made by scripts/serve.sh; the deploy
+# copies the real folders in. js/data-snapshot.js IS committed so that a bare
+# clone of site/ still works and the offline demo survives a dead network.
 site/data
 
 .DS_Store
-site/js/data-snapshot.js
 _site/

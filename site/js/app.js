@@ -3,7 +3,13 @@
 (function () {
   'use strict';
 
-  var DATA = 'data/';
+  // Where the data contract sits relative to this page. 'data/' is the deployed
+  // layout (build-site.sh copies it in). '../data/' covers someone serving the
+  // repository root straight from a clone. If neither answers, the bundled
+  // snapshot takes over, so the page never dies on a 404.
+  var BASES = ['data/', '../data/'];
+  var baseIndex = 0;
+  function DATA() { return BASES[baseIndex]; }
   var COLORS = { green: '#15803d', amber: '#d97706', red: '#c2250f', nodata: '#94a3b8' };
   var RAMP = ['#eef4ea', '#cfe2c4', '#a3cb98', '#5fa86d', '#15803d'];
   var HA_LAYERS = [
@@ -83,11 +89,25 @@
     });
   }
   function version() { return meta ? encodeURIComponent(meta.generated_at) : Math.floor(Date.now() / 3.6e6); }
+  function fetchFrom(base, path, bust) {
+    return fetch(base + path + '?v=' + (bust || version()), { cache: 'no-cache' })
+      .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + path); return r.json(); });
+  }
   function getJSON(path, bust) {
     if (window.ATLAS_SNAPSHOT) return fromSnapshot(path);
-    return fetch(DATA + path + '?v=' + (bust || version()), { cache: 'no-cache' })
-      .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + path); return r.json(); })
-      .catch(function (err) { return fromSnapshot(path).catch(function () { throw err; }); });
+    return fetchFrom(DATA(), path, bust).catch(function (err) {
+      // try the other layout once, then fall back to the offline snapshot
+      for (var i = 0; i < BASES.length; i++) {
+        if (i === baseIndex) continue;
+        return fetchFrom(BASES[i], path, bust).then(function (data) {
+          baseIndex = i;
+          return data;
+        }).catch(function () {
+          return fromSnapshot(path).catch(function () { throw err; });
+        });
+      }
+      return fromSnapshot(path).catch(function () { throw err; });
+    });
   }
   function series(id) {
     if (!seriesCache[id]) seriesCache[id] = getJSON('series/' + id + '.json').catch(function () { return null; });
@@ -509,7 +529,7 @@
       el('button', { 'class': 'btn', type: 'button', onclick: function () { downloadCSV(ser, id, label); } },
         [icon('download', 'icon-sm'), document.createTextNode(t('download_csv'))]),
       el('a', { 'class': 'btn ghost', download: '',
-        href: DATA + (state.level === 'uc' ? 'ucs/' + state.districtId + '.geojson' : 'districts.geojson') },
+        href: DATA() + (state.level === 'uc' ? 'ucs/' + state.districtId + '.geojson' : 'districts.geojson') },
         [icon('download', 'icon-sm'), document.createTextNode(t('download_geojson'))])]);
   }
   function sourcesBlock(ser) {
@@ -642,9 +662,13 @@
       else openProvince();
     }).catch(function (err) {
       setLoading(false);
-      qs('panel').innerHTML = '<div class="panel-inner"><h1>Could not load data</h1>' +
+      qs('panel').innerHTML = '<div class="panel-inner"><h1>Could not load the data files</h1>' +
         '<p class="hint">' + err.message + '</p>' +
-        '<p class="hint">Serve the site with <code>./scripts/serve.sh</code> so that <code>data/meta.json</code> sits next to this page.</p></div>';
+        '<p class="hint">This page needs the <code>data/</code> folder beside it. From a clone:</p>' +
+        '<pre style="white-space:pre-wrap">./scripts/serve.sh</pre>' +
+        '<p class="hint">For a deployment, build first and serve the result:</p>' +
+        '<pre style="white-space:pre-wrap">./scripts/build-site.sh\npython3 -m http.server -d _site 8000</pre>' +
+        '<p class="hint">Publishing <code>site/</code> on its own will not work, because the data lives outside it.</p></div>';
     });
   }
   boot();
