@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Step 2: daily rainfall from NASA POWER for every centroid, with a disk cache.
+"""Step 2: daily weather from NASA POWER for every centroid, with a disk cache.
+
+Pulls rainfall and the six variables needed for FAO-56 reference evapotranspiration
+in a single request per point, so the whole water balance comes from one NASA source.
 
 Usage:
   python3 fetch_power.py [--centroids cache/boundaries/centroids.csv] [--days 70]
 
 Writes pipeline/cache/power/<id>.json  {"lon","lat","start","end","daily":{"YYYYMMDD": mm}}
-POWER PRECTOTCORR is bias-corrected precipitation in mm/day on a 0.5 x 0.625
-degree MERRA-2 grid. One point per request; ~150 requests take 3 to 6 minutes.
+PRECTOTCORR is bias-corrected precipitation in mm/day on a 0.5 x 0.625 degree
+MERRA-2 grid. One point per request.
 Re-running only fetches points whose cache does not cover the requested window.
 """
 import argparse
@@ -23,7 +26,10 @@ import requests
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(HERE, "cache", "power")
 URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
-PARAM = "PRECTOTCORR"
+# Rainfall plus every input the FAO-56 Penman-Monteith reference evapotranspiration
+# needs, so one request per point serves both halves of the water balance.
+PARAMS = ["PRECTOTCORR", "T2M_MAX", "T2M_MIN", "RH2M", "WS2M", "ALLSKY_SFC_SW_DWN", "PS"]
+PARAM = ",".join(PARAMS)
 
 
 def fetch_point(lon, lat, start, end, retries=4):
@@ -36,9 +42,13 @@ def fetch_point(lon, lat, start, end, retries=4):
             if r.status_code == 429 or r.status_code >= 500:
                 raise requests.HTTPError(f"{r.status_code}")
             r.raise_for_status()
-            daily = r.json()["properties"]["parameter"][PARAM]
+            block = r.json()["properties"]["parameter"]
             # POWER uses -999 for missing days
-            return {k: (None if v is None or v < -900 else round(float(v), 2)) for k, v in daily.items()}
+            out = {}
+            for name in PARAMS:
+                series = block.get(name, {})
+                out[name] = {k: (None if v is None or v < -900 else round(float(v), 3)) for k, v in series.items()}
+            return out
         except Exception as exc:  # noqa: BLE001
             if attempt == retries - 1:
                 raise
@@ -71,7 +81,8 @@ def main():
         if os.path.exists(path):
             with open(path, encoding="utf-8") as fh:
                 old = json.load(fh)
-            if old.get("start") <= start.isoformat() and old.get("end") >= end.isoformat():
+            if (old.get("start") <= start.isoformat() and old.get("end") >= end.isoformat()
+                    and old.get("parameters") == PARAMS):
                 skipped += 1
                 continue
         todo.append(p)
@@ -81,7 +92,9 @@ def main():
         daily = fetch_point(float(p["lon"]), float(p["lat"]), start, end)
         with open(os.path.join(CACHE, f"{p['id']}.json"), "w", encoding="utf-8") as fh:
             json.dump({"id": p["id"], "lon": float(p["lon"]), "lat": float(p["lat"]), "start": start.isoformat(),
-                       "end": end.isoformat(), "parameter": PARAM, "units": "mm/day",
+                       "end": end.isoformat(), "parameters": PARAMS,
+                       "units": {"PRECTOTCORR": "mm/day", "T2M_MAX": "C", "T2M_MIN": "C", "RH2M": "%",
+                                 "WS2M": "m/s", "ALLSKY_SFC_SW_DWN": "MJ/m^2/day", "PS": "kPa"},
                        "fetched_at": date.today().isoformat(), "daily": daily}, fh)
         return p["id"]
 

@@ -1,0 +1,624 @@
+{
+ "_note": "Tutorial content rendered by js/guide.js. One entry per language.",
+ "en": {
+  "title": "How to use the Atlas",
+  "lede": "This map answers one question for every union council in Khyber Pakhtunkhwa: over the last ten days, did the crops get as much water as they needed? This page explains how to read it in about three minutes.",
+  "sections": [
+   {
+    "id": "what",
+    "icon": "satellite",
+    "title": "What the map answers",
+    "blocks": [
+     {
+      "p": "Every ten days, satellites and weather models tell us two numbers for each union council: how much water the crops needed, and how much rain fell. The Atlas subtracts one from the other and colours the map by the result."
+     },
+     {
+      "diagram": "balance"
+     },
+     {
+      "p": "A deficit is normal in a dry season. What matters is how large it is, and whether it has been growing for several periods in a row."
+     },
+     {
+      "note": "The Atlas describes a whole union council, not a single field. One satellite pixel covers several small farms."
+     }
+    ]
+   },
+   {
+    "id": "colours",
+    "icon": "droplet",
+    "title": "What the colours mean",
+    "blocks": [
+     {
+      "keys": [
+       {
+        "color": "green",
+        "b": "Green",
+        "s": "Rain covered what the crops needed. No deficit."
+       },
+       {
+        "color": "amber",
+        "b": "Amber",
+        "s": "A deficit of 1 to 30 mm. One irrigation turn covers this."
+       },
+       {
+        "color": "red",
+        "b": "Red",
+        "s": "A deficit above 30 mm. More than one irrigation turn is missing."
+       },
+       {
+        "color": "nodata",
+        "b": "Grey",
+        "s": "No cropland was mapped here, or a source was missing."
+       }
+      ]
+     },
+     {
+      "p": "The 30 mm boundary is not arbitrary. A canal turn in this region delivers roughly 30 mm to the root zone, so a deficit under 30 mm is one turn away from balance and a deficit above it means a turn was missed."
+     }
+    ]
+   },
+   {
+    "id": "steps",
+    "icon": "map",
+    "title": "Five steps on the map",
+    "blocks": [
+     {
+      "steps": [
+       {
+        "h": "Choose the ten days",
+        "p": "The date box at the top of the screen holds the last six periods. It opens on the most recent one. Change it to see whether a place is getting better or worse."
+       },
+       {
+        "h": "Find your district",
+        "p": "Tap a district on the map, or type its name in the search box. The side list is sorted by deficit, so the driest districts are at the top."
+       },
+       {
+        "h": "Open a union council",
+        "p": "Inside a district you see its union councils, each with its own colour. Tap one, or use the list, which is also sorted driest first."
+       },
+       {
+        "h": "Read the card",
+        "p": "The coloured card gives the deficit in millimetres, the water needed, the rain received, and how many hectares of cropland the signal covers."
+       },
+       {
+        "h": "Check the trend",
+        "p": "The chart below shows the last six periods. Two tall blue bars with no grey rain beside them, three periods running, is the pattern worth driving to."
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "layers",
+    "icon": "layers",
+    "title": "Switching the map layer",
+    "blocks": [
+     {
+      "p": "Inside a district you can switch from water balance to land cover. Cropland shows how many hectares of each union council are farmed, shaded from light to dark within that district."
+     },
+     {
+      "p": "Winter cereals, maize and irrigated land appear once ESA WorldCereal is connected through Earth Engine. Until then those buttons stay switched off rather than showing an estimate."
+     }
+    ]
+   },
+   {
+    "id": "words",
+    "icon": "book",
+    "title": "What the words mean",
+    "blocks": [
+     {
+      "glossary": [
+       {
+        "t": "Ten-day period (dekad)",
+        "d": "Days 1 to 10, 11 to 20, and 21 to the end of each month. Satellite water products are published on this calendar, so the Atlas uses it too."
+       },
+       {
+        "t": "Water needed",
+        "d": "The water a well-watered crop would use in the period, calculated from NASA temperature, humidity, wind, sunshine and pressure using the FAO-56 method."
+       },
+       {
+        "t": "Rain received",
+        "d": "Rainfall measured by NASA's POWER service, added up over the same ten days."
+       },
+       {
+        "t": "Deficit",
+        "d": "Water needed minus rain received. A positive number means irrigation has to make up the difference."
+       },
+       {
+        "t": "Union council",
+        "d": "The smallest unit shown here. In this version the polygons are tehsils, because public union-council boundaries were not available."
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "download",
+    "icon": "download",
+    "title": "Taking the numbers away",
+    "blocks": [
+     {
+      "p": "Every district and union council has a Download CSV button. The file holds all six periods with the water needed, the rain, the deficit and the colour, plus the sources and the exact time the file was generated."
+     },
+     {
+      "p": "Download GeoJSON gives the boundaries with the same values attached, ready for QGIS or any mapping tool."
+     }
+    ]
+   },
+   {
+    "id": "limits",
+    "icon": "alert",
+    "title": "What it cannot tell you",
+    "blocks": [
+     {
+      "ul": [
+       "Nothing about one farm. The smallest honest unit is the union council.",
+       "Nothing about the future. Every number describes the last ten days.",
+       "Nothing about yield, food security, groundwater or soil salinity.",
+       "Crop type comes from a 2021 satellite map, so fields that changed crop since then are described by what grew in 2021.",
+       "Rainfall comes from a half-degree grid, so a single local storm can be smoothed away."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "updates",
+    "icon": "refresh",
+    "title": "Where the numbers come from",
+    "blocks": [
+     {
+      "table": {
+       "head": [
+        "Layer",
+        "Source",
+        "Updates"
+       ],
+       "rows": [
+        [
+         "Rain",
+         "NASA POWER daily precipitation",
+         "Every week"
+        ],
+        [
+         "Water needed",
+         "NASA POWER weather, FAO-56 method",
+         "Every week"
+        ],
+        [
+         "Cropland",
+         "ESA WorldCover 2021, 10 m",
+         "Fixed, 2021"
+        ],
+        [
+         "Boundaries",
+         "geoBoundaries, public domain",
+         "Fixed"
+        ]
+       ]
+      }
+     },
+     {
+      "p": "A scheduled job re-runs the pipeline every Monday morning and publishes the result, so the map keeps itself current with nobody touching it. The footer of every screen shows exactly when the data you are looking at was generated."
+     },
+     {
+      "p": "Everything is open. The code, the data files and the method are in the public repository, and the Methods page explains each dataset and its weaknesses in full."
+     }
+    ]
+   }
+  ]
+ },
+ "ur": {
+  "title": "اٹلس کیسے استعمال کریں",
+  "lede": "یہ نقشہ خیبر پختونخوا کی ہر یونین کونسل کے بارے میں ایک سوال کا جواب دیتا ہے: پچھلے دس دنوں میں فصلوں کو جتنا پانی درکار تھا، کیا اتنا ملا؟ یہ صفحہ تین منٹ میں نقشہ پڑھنا سکھاتا ہے۔",
+  "sections": [
+   {
+    "id": "what",
+    "icon": "satellite",
+    "title": "نقشہ کس سوال کا جواب دیتا ہے",
+    "blocks": [
+     {
+      "p": "ہر دس دن بعد سیٹلائٹ اور موسمی ماڈل ہمیں دو عدد دیتے ہیں: فصلوں کو کتنا پانی درکار تھا، اور کتنی بارش ہوئی۔ اٹلس ان کا فرق نکال کر نقشے کو رنگ دیتا ہے۔"
+     },
+     {
+      "diagram": "balance"
+     },
+     {
+      "p": "خشک موسم میں کمی معمول کی بات ہے۔ اہم یہ ہے کہ کمی کتنی بڑی ہے، اور کیا وہ مسلسل کئی ادوار سے بڑھ رہی ہے۔"
+     },
+     {
+      "note": "اٹلس پوری یونین کونسل کی بات کرتا ہے، کسی ایک کھیت کی نہیں۔ ایک سیٹلائٹ پکسل میں کئی چھوٹے فارم آ جاتے ہیں۔"
+     }
+    ]
+   },
+   {
+    "id": "colours",
+    "icon": "droplet",
+    "title": "رنگوں کا مطلب",
+    "blocks": [
+     {
+      "keys": [
+       {
+        "color": "green",
+        "b": "سبز",
+        "s": "بارش نے فصل کی ضرورت پوری کر دی۔ کوئی کمی نہیں۔"
+       },
+       {
+        "color": "amber",
+        "b": "زرد",
+        "s": "1 تا 30 ملی میٹر کمی۔ ایک آبپاشی باری سے پوری ہو جاتی ہے۔"
+       },
+       {
+        "color": "red",
+        "b": "سرخ",
+        "s": "30 ملی میٹر سے زیادہ کمی۔ ایک سے زیادہ باری رہ گئی ہے۔"
+       },
+       {
+        "color": "nodata",
+        "b": "خاکستری",
+        "s": "یہاں زرعی زمین نقشے پر نہیں، یا ماخذ موجود نہیں۔"
+       }
+      ]
+     },
+     {
+      "p": "30 ملی میٹر کی حد بےوجہ نہیں۔ اس علاقے میں نہر کی ایک باری جڑوں تک تقریباً 30 ملی میٹر پانی پہنچاتی ہے، اس لیے اس سے کم کمی ایک باری سے پوری ہو جاتی ہے اور زیادہ کمی کا مطلب ہے کہ ایک باری رہ گئی۔"
+     }
+    ]
+   },
+   {
+    "id": "steps",
+    "icon": "map",
+    "title": "نقشے پر پانچ قدم",
+    "blocks": [
+     {
+      "steps": [
+       {
+        "h": "دس دن کا انتخاب کریں",
+        "p": "اوپر تاریخ کے خانے میں پچھلے چھ ادوار موجود ہیں۔ یہ تازہ ترین پر کھلتا ہے۔ اسے بدل کر دیکھیں کہ حالت بہتر ہو رہی ہے یا خراب۔"
+       },
+       {
+        "h": "اپنا ضلع ڈھونڈیں",
+        "p": "نقشے پر ضلع ٹیپ کریں یا تلاش کے خانے میں نام لکھیں۔ فہرست کمی کے لحاظ سے ترتیب میں ہے، سب سے خشک اوپر۔"
+       },
+       {
+        "h": "یونین کونسل کھولیں",
+        "p": "ضلع کے اندر اس کی یونین کونسلیں اپنے رنگ کے ساتھ نظر آتی ہیں۔ کسی ایک پر ٹیپ کریں یا فہرست استعمال کریں۔"
+       },
+       {
+        "h": "کارڈ پڑھیں",
+        "p": "رنگین کارڈ کمی ملی میٹر میں، درکار پانی، ملنے والی بارش، اور متاثرہ زرعی رقبہ بتاتا ہے۔"
+       },
+       {
+        "h": "رجحان دیکھیں",
+        "p": "نیچے چارٹ پچھلے چھ ادوار دکھاتا ہے۔ مسلسل تین ادوار میں بلند نیلی سلاخیں اور ساتھ بارش نہ ہونا، وہ صورتحال ہے جہاں جانا بنتا ہے۔"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "layers",
+    "icon": "layers",
+    "title": "نقشے کی تہہ بدلنا",
+    "blocks": [
+     {
+      "p": "ضلع کے اندر آپ آبی توازن سے زمینی احاطے پر جا سکتے ہیں۔ زرعی زمین بتاتی ہے کہ ہر یونین کونسل میں کتنے ہیکٹر پر کاشت ہوتی ہے۔"
+     },
+     {
+      "p": "ربیع اناج، مکئی اور آبپاش زمین اس وقت آئیں گے جب ESA WorldCereal ارتھ انجن کے ذریعے منسلک ہو گا۔ تب تک یہ بٹن بند رہتے ہیں، اندازہ نہیں دکھایا جاتا۔"
+     }
+    ]
+   },
+   {
+    "id": "words",
+    "icon": "book",
+    "title": "اصطلاحات کا مطلب",
+    "blocks": [
+     {
+      "glossary": [
+       {
+        "t": "دس روزہ مدت",
+        "d": "مہینے کے 1 تا 10، 11 تا 20، اور 21 تا آخر۔ سیٹلائٹ کے پانی سے متعلق اعداد اسی کیلنڈر پر شائع ہوتے ہیں۔"
+       },
+       {
+        "t": "درکار پانی",
+        "d": "اس مدت میں بھرپور سیراب فصل جتنا پانی استعمال کرتی، ناسا کے درجہ حرارت، نمی، ہوا، دھوپ اور دباؤ سے FAO-56 طریقے سے نکالا گیا۔"
+       },
+       {
+        "t": "ملنے والی بارش",
+        "d": "ناسا کی POWER سروس سے ناپی گئی بارش، انہی دس دنوں کا مجموعہ۔"
+       },
+       {
+        "t": "کمی",
+        "d": "درکار پانی منہا ملنے والی بارش۔ مثبت عدد کا مطلب ہے کہ فرق آبپاشی سے پورا کرنا ہو گا۔"
+       },
+       {
+        "t": "یونین کونسل",
+        "d": "یہاں دکھائی جانے والی سب سے چھوٹی اکائی۔ اس نسخے میں یہ تحصیلیں ہیں، کیونکہ عوامی یونین کونسل حدود دستیاب نہیں تھیں۔"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "download",
+    "icon": "download",
+    "title": "اعداد و شمار لے جانا",
+    "blocks": [
+     {
+      "p": "ہر ضلع اور یونین کونسل کے لیے CSV ڈاؤن لوڈ کا بٹن ہے۔ فائل میں چھ ادوار، درکار پانی، بارش، کمی، رنگ، ماخذ اور فائل بننے کا وقت شامل ہے۔"
+     },
+     {
+      "p": "GeoJSON ڈاؤن لوڈ وہی اعداد حدود کے ساتھ دیتا ہے، QGIS یا کسی بھی نقشہ سازی کے ٹول کے لیے تیار۔"
+     }
+    ]
+   },
+   {
+    "id": "limits",
+    "icon": "alert",
+    "title": "یہ کیا نہیں بتا سکتا",
+    "blocks": [
+     {
+      "ul": [
+       "کسی ایک فارم کے بارے میں کچھ نہیں۔ سب سے چھوٹی دیانت دار اکائی یونین کونسل ہے۔",
+       "مستقبل کے بارے میں کچھ نہیں۔ ہر عدد پچھلے دس دنوں کا ہے۔",
+       "پیداوار، غذائی تحفظ، زیر زمین پانی یا زمینی نمکیات کے بارے میں کچھ نہیں۔",
+       "فصل کی قسم 2021 کے سیٹلائٹ نقشے سے ہے، اس لیے بعد میں بدلے کھیت 2021 کی فصل سے بیان ہوتے ہیں۔",
+       "بارش آدھے درجے کے گرڈ سے آتی ہے، اس لیے مقامی بارش دب سکتی ہے۔"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "updates",
+    "icon": "refresh",
+    "title": "اعداد کہاں سے آتے ہیں",
+    "blocks": [
+     {
+      "table": {
+       "head": [
+        "تہہ",
+        "ماخذ",
+        "تجدید"
+       ],
+       "rows": [
+        [
+         "بارش",
+         "ناسا POWER یومیہ بارش",
+         "ہر ہفتے"
+        ],
+        [
+         "درکار پانی",
+         "ناسا POWER موسم، FAO-56 طریقہ",
+         "ہر ہفتے"
+        ],
+        [
+         "زرعی زمین",
+         "ESA WorldCover 2021، 10 میٹر",
+         "مقرر، 2021"
+        ],
+        [
+         "حدود",
+         "geoBoundaries، عوامی",
+         "مقرر"
+        ]
+       ]
+      }
+     },
+     {
+      "p": "ہر پیر کی صبح ایک خودکار عمل پورا پائپ لائن دوبارہ چلاتا ہے اور نتیجہ شائع کر دیتا ہے، اس لیے نقشہ خود کو تازہ رکھتا ہے۔ ہر اسکرین کے نیچے لکھا ہوتا ہے کہ ڈیٹا کب تیار ہوا۔"
+     },
+     {
+      "p": "سب کچھ کھلا ہے۔ کوڈ، ڈیٹا فائلیں اور طریقہ عوامی ریپوزٹری میں موجود ہیں، اور طریقہ کار کا صفحہ ہر ڈیٹاسیٹ اور اس کی کمزوریاں تفصیل سے بیان کرتا ہے۔"
+     }
+    ]
+   }
+  ]
+ },
+ "ps": {
+  "title": "اټلس څنګه وکاروو",
+  "lede": "دا نقشه د خیبر پښتونخوا د هرې یونین کونسل لپاره یوې پوښتنې ته ځواب ورکوي: په تېرو لسو ورځو کې فصلونو ته څومره اوبه پکار وې، او څومره یې ترلاسه کړې؟ دا مخ په درېیو دقیقو کې نقشه لوستل درزده کوي.",
+  "sections": [
+   {
+    "id": "what",
+    "icon": "satellite",
+    "title": "نقشه کومې پوښتنې ته ځواب وايي",
+    "blocks": [
+     {
+      "p": "هرې لسې ورځې، سپوږمکۍ او د هوا ماډلونه موږ ته دوه شمېرې راکوي: فصلونو ته څومره اوبه پکار وې، او څومره باران وشو. اټلس یې توپیر باسي او نقشه پرې رنګوي."
+     },
+     {
+      "diagram": "balance"
+     },
+     {
+      "p": "په وچ موسم کې کمښت عادي خبره ده. مهمه دا ده چې کمښت څومره لوی دی، او ایا پرله پسې څو مودې زیاتېږي."
+     },
+     {
+      "note": "اټلس د بشپړې یونین کونسل خبره کوي، نه د یوه پټي. په یوه سپوږمکۍ پیکسل کې څو کوچني فارمونه راځي."
+     }
+    ]
+   },
+   {
+    "id": "colours",
+    "icon": "droplet",
+    "title": "د رنګونو مانا",
+    "blocks": [
+     {
+      "keys": [
+       {
+        "color": "green",
+        "b": "شین",
+        "s": "باران د فصل اړتیا پوره کړه. کمښت نشته."
+       },
+       {
+        "color": "amber",
+        "b": "ژېړ",
+        "s": "۱ تر ۳۰ ملي متره کمښت. یوه د اوبو وار یې پوره کوي."
+       },
+       {
+        "color": "red",
+        "b": "سور",
+        "s": "له ۳۰ ملي مترو زیات کمښت. له یوې وارې زیات پاتې دی."
+       },
+       {
+        "color": "nodata",
+        "b": "خړ",
+        "s": "دلته کرنیزه ځمکه نقشه شوې نه ده، یا سرچینه نشته."
+       }
+      ]
+     },
+     {
+      "p": "د ۳۰ ملي مترو برید بې دلیله نه دی. په دې سیمه کې د ویالې یوه وار نږدې ۳۰ ملي متره اوبه ریښو ته رسوي، نو تر دې کم کمښت په یوه وار پوره کېږي او تر دې زیات یعنې یوه وار پاتې شوې."
+     }
+    ]
+   },
+   {
+    "id": "steps",
+    "icon": "map",
+    "title": "په نقشه کې پنځه ګامه",
+    "blocks": [
+     {
+      "steps": [
+       {
+        "h": "لس ورځې وټاکئ",
+        "p": "پورته د نېټې په بکس کې وروستۍ شپږ مودې دي. په تازه موده پرانیستل کېږي. بدل یې کړئ ترڅو وګورئ حالت ښه کېږي که خراب."
+       },
+       {
+        "h": "خپله ولسوالۍ ومومئ",
+        "p": "په نقشه کې ولسوالۍ ټچ کړئ یا په لټون بکس کې نوم ولیکئ. لیست د کمښت له مخې ترتیب دی، تر ټولو وچ پورته."
+       },
+       {
+        "h": "یونین کونسل پرانیزئ",
+        "p": "د ولسوالۍ دننه یې یونین کونسلونه په خپلو رنګونو ښکاري. یو یې ټچ کړئ یا لیست وکاروئ."
+       },
+       {
+        "h": "کارت ولولئ",
+        "p": "رنګین کارت کمښت په ملي مترو، اړینې اوبه، ترلاسه شوی باران، او اغېزمنه کرنیزه ساحه ښیي."
+       },
+       {
+        "h": "لور وګورئ",
+        "p": "لاندې چارټ وروستۍ شپږ مودې ښیي. پرله پسې درې مودې لوړې نیلي کرښې او باران نه، هغه حالت دی چې تګ یې ارزي."
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "layers",
+    "icon": "layers",
+    "title": "د نقشې پوړ بدلول",
+    "blocks": [
+     {
+      "p": "د ولسوالۍ دننه کولای شئ له اوبو توازن څخه ځمکنۍ پوښښ ته ولاړ شئ. کرنیزه ځمکه ښیي چې په هره یونین کونسل کې څومره هکتاره کرل کېږي."
+     },
+     {
+      "p": "ژمني غله، جوار او خړوبه ځمکه هغه وخت راځي چې ESA WorldCereal د ارت انجن له لارې وصل شي. تر هغه دا تڼۍ بندې دي، اټکل نه ښودل کېږي."
+     }
+    ]
+   },
+   {
+    "id": "words",
+    "icon": "book",
+    "title": "د اصطلاحاتو مانا",
+    "blocks": [
+     {
+      "glossary": [
+       {
+        "t": "لس ورځنۍ موده",
+        "d": "د میاشتې ۱ تر ۱۰، ۱۱ تر ۲۰، او ۲۱ تر پایه. د سپوږمکیو د اوبو شمېرې په همدې کلیز خپرېږي."
+       },
+       {
+        "t": "اړینې اوبه",
+        "d": "په دې موده کې به ښه خړوب شوی فصل څومره اوبه کارولې، د ناسا له تودوخې، لمدوالي، باد، لمر او فشار څخه د FAO-56 په طریقه."
+       },
+       {
+        "t": "ترلاسه شوی باران",
+        "d": "د ناسا د POWER خدمت له لارې اندازه شوی باران، د همدې لسو ورځو ټولګه."
+       },
+       {
+        "t": "کمښت",
+        "d": "اړینې اوبه منفي ترلاسه شوی باران. مثبت عدد یعنې توپیر باید په خړوبولو پوره شي."
+       },
+       {
+        "t": "یونین کونسل",
+        "d": "دلته تر ټولو کوچنی واحد. په دې نسخه کې دا تحصیلونه دي، ځکه عامه یونین کونسل پولې نه وې."
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "download",
+    "icon": "download",
+    "title": "شمېرې له ځان سره وړل",
+    "blocks": [
+     {
+      "p": "د هرې ولسوالۍ او یونین کونسل لپاره د CSV ډاونلوډ تڼۍ شته. دوتنه کې شپږ مودې، اړینې اوبه، باران، کمښت، رنګ، سرچینې او د جوړېدو وخت دي."
+     },
+     {
+      "p": "GeoJSON ډاونلوډ همدغه شمېرې له پولو سره درکوي، د QGIS یا هر نقشې اوزار لپاره چمتو."
+     }
+    ]
+   },
+   {
+    "id": "limits",
+    "icon": "alert",
+    "title": "دا څه نشي ویلای",
+    "blocks": [
+     {
+      "ul": [
+       "د یوه فارم په اړه هیڅ. تر ټولو کوچنی رښتینی واحد یونین کونسل دی.",
+       "د راتلونکي په اړه هیڅ. هره شمېره د تېرو لسو ورځو ده.",
+       "د حاصل، خوړو امنیت، ځمکنیو اوبو یا مالګینوالي په اړه هیڅ.",
+       "د فصل ډول د ۲۰۲۱ له سپوږمکۍ نقشې دی، نو وروسته بدل شوي پټي د ۲۰۲۱ په فصل بیانېږي.",
+       "باران د نیم درجې له جالي راځي، نو ځایی باران کېدای شي ورک شي."
+      ]
+     }
+    ]
+   },
+   {
+    "id": "updates",
+    "icon": "refresh",
+    "title": "شمېرې له کومه راځي",
+    "blocks": [
+     {
+      "table": {
+       "head": [
+        "پوړ",
+        "سرچینه",
+        "تازه کېدل"
+       ],
+       "rows": [
+        [
+         "باران",
+         "ناسا POWER ورځنی باران",
+         "هره اونۍ"
+        ],
+        [
+         "اړینې اوبه",
+         "ناسا POWER هوا، FAO-56 طریقه",
+         "هره اونۍ"
+        ],
+        [
+         "کرنیزه ځمکه",
+         "ESA WorldCover 2021، ۱۰ متره",
+         "ثابت، ۲۰۲۱"
+        ],
+        [
+         "پولې",
+         "geoBoundaries، عامه",
+         "ثابت"
+        ]
+       ]
+      }
+     },
+     {
+      "p": "هر دوشنبه سهار یو خودکار کار ټوله کړنلاره بیا چلوي او پایله خپروي، نو نقشه پخپله تازه پاتې کېږي. د هر مخ په پای کې لیکل شوي وي چې ډېټا کله جوړه شوې."
+     },
+     {
+      "p": "هر څه خلاص دي. کوډ، د ډېټا دوتنې او طریقه په عامه ذخیره کې دي، او د طریقې مخ هره سرچینه او یې کمزورۍ بشپړې بیانوي."
+     }
+    ]
+   }
+  ]
+ }
+}

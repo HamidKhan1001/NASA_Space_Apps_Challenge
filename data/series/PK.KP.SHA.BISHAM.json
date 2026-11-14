@@ -6,67 +6,64 @@
   {
    "start": "2026-09-11",
    "end": "2026-09-20",
-   "et_mm": 46.9,
+   "et_mm": 31.4,
    "rain_mm": 29.7,
-   "deficit_mm": 17.2,
+   "deficit_mm": 1.7,
    "status": "amber"
   },
   {
    "start": "2026-09-21",
    "end": "2026-09-30",
-   "et_mm": 46.9,
+   "et_mm": 29.5,
    "rain_mm": 9.6,
-   "deficit_mm": 37.3,
-   "status": "red"
+   "deficit_mm": 19.9,
+   "status": "amber"
   },
   {
    "start": "2026-10-01",
    "end": "2026-10-10",
-   "et_mm": 36.5,
+   "et_mm": 28.1,
    "rain_mm": 4.1,
-   "deficit_mm": 32.4,
-   "status": "red"
+   "deficit_mm": 24.0,
+   "status": "amber"
   },
   {
    "start": "2026-10-11",
    "end": "2026-10-20",
-   "et_mm": 36.5,
+   "et_mm": 20.1,
    "rain_mm": 21.4,
-   "deficit_mm": 15.1,
-   "status": "amber"
+   "deficit_mm": -1.3,
+   "status": "green"
   },
   {
    "start": "2026-10-21",
    "end": "2026-10-31",
-   "et_mm": 40.2,
+   "et_mm": 21.3,
    "rain_mm": 1.1,
-   "deficit_mm": 39.1,
-   "status": "red"
+   "deficit_mm": 20.2,
+   "status": "amber"
   },
   {
    "start": "2026-11-01",
    "end": "2026-11-10",
-   "et_mm": 29.2,
+   "et_mm": 14.6,
    "rain_mm": 2.7,
-   "deficit_mm": 26.5,
+   "deficit_mm": 11.9,
    "status": "amber"
   }
  ],
  "hectares": {
-  "crop_ha": 5794,
-  "wheat_ha": 3490,
-  "maize_ha": 1571,
-  "irrigated_ha": 3358
+  "crop_ha": 510,
+  "wheat_ha": null,
+  "maize_ha": null,
+  "irrigated_ha": null
  },
+ "et_method": "fao56_power",
+ "status_basis": "cropland",
  "sources": {
-  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "water_demand": "Reference evapotranspiration (FAO-56 Penman-Monteith) from NASA POWER daily weather",
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
-  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+  "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "source_status": {
-  "et": "synthetic",
-  "rain": "live",
-  "crops": "synthetic"
- },
- "generated_at": "2026-11-14T07:46:45Z"
+ "generated_at": "2026-11-14T08:04:57Z"
 }

@@ -23,17 +23,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Offline snapshot
-        run: python3 pipeline/make_snapshot.py
+      - name: Build _site
+        run: ./scripts/build-site.sh
 
-      - name: Stage site with data and docs
-        run: |
-          rm -rf _site && mkdir _site
-          cp -r site/. _site/
-          rm -rf _site/data _site/docs
-          cp -r data _site/data
-          cp -r docs _site/docs
-          du -sh _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

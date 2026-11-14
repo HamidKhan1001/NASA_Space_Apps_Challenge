@@ -1,6 +1,8 @@
 {
- "generated_at": "2026-11-14T07:46:45Z",
- "mode": "demo",
+ "generated_at": "2026-11-14T08:04:57Z",
+ "mode": "live",
+ "et_method": "fao56_power",
+ "status_basis": "cropland",
  "latest_dekad": {
   "start": "2026-11-01",
   "end": "2026-11-10"
@@ -51,11 +53,12 @@
   "rationale": "Rabi wheat in the Peshawar valley uses about 3 to 4 mm/day in Nov-Dec, i.e. 30 to 40 mm per dekad. A single canal irrigation turn delivers roughly 30 mm (75 mm depth applied at 40% efficiency). See docs/thresholds.md."
  },
  "sources": {
-  "et": {
-   "name": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
-   "dataset": "FAO/WAPOR/3/L2_AETI_D (not connected)",
-   "status": "synthetic",
-   "licence": "CC BY 4.0 (FAO)"
+  "water_demand": {
+   "name": "Reference evapotranspiration (FAO-56 Penman-Monteith) from NASA POWER daily weather",
+   "dataset": "NASA POWER T2M_MAX, T2M_MIN, RH2M, WS2M, ALLSKY_SFC_SW_DWN, PS",
+   "method": "fao56_power",
+   "status": "live",
+   "licence": "Public domain (NASA)"
   },
   "rain": {
    "name": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
@@ -63,31 +66,38 @@
    "status": "live",
    "licence": "Public domain (NASA)"
   },
-  "crops": {
-   "name": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation",
-   "dataset": "ESA/WorldCereal/2021/MODELS/v100",
-   "status": "synthetic",
+  "cropland": {
+   "name": "ESA WorldCover 2021 v200, class 40 cropland, 10 m",
+   "dataset": "esa-worldcover public bucket, statistics at about 75 m",
+   "status": "live",
    "licence": "CC BY 4.0 (ESA)"
   },
+  "crop_type": {
+   "name": "ESA WorldCereal 2021 v100: winter cereals, maize, active irrigation",
+   "dataset": "ESA/WorldCereal/2021/MODELS/v100 via Earth Engine",
+   "status": "not_connected",
+   "licence": "CC BY 4.0 (ESA)",
+   "note": "Needs Earth Engine credentials. Until then these hectares are reported as unavailable rather than estimated."
+  },
   "boundaries": {
-   "name": "geoBoundaries gbOpen Pakistan ADM2 (districts, 2019) and ADM3 (tehsils, 2017)",
+   "name": "geoBoundaries gbOpen Pakistan ADM2 districts (2019) and ADM3 tehsils (2017)",
    "dataset": "github.com/wmgeolab/geoBoundaries release 9469f09",
    "status": "live",
-   "licence": "Public domain / CC BY 4.0 (geoBoundaries)",
-   "note": "Level-3 units are tehsils, not union councils; 31 districts reflect 2019 boundaries."
+   "licence": "Public domain / CC BY 4.0",
+   "note": "Level-3 units are tehsils, not union councils; 31 districts, not 35."
   }
  },
  "counts": {
   "districts": 31,
   "level3_units": 122,
   "district_status": {
-   "green": 0,
-   "amber": 27,
-   "red": 4,
+   "green": 1,
+   "amber": 28,
+   "red": 2,
    "nodata": 0
   },
-  "rain_missing_units": 0
+  "units_without_weather": 0
  },
  "unit_note": "Level-3 units are tehsils from geoBoundaries until union-council polygons are sourced.",
- "contract_version": "0.1"
+ "contract_version": "0.2"
 }

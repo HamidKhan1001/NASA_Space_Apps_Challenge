@@ -10,7 +10,8 @@ The first public map of **what grows where in Khyber Pakhtunkhwa, which land is 
 1. **Province:** 31 districts coloured green, amber or red by water balance for the latest dekad (ten days). Six dekads to choose from. English, Urdu, Pashto.
 2. **District:** its union councils (tehsils in v0.1), coloured by status, or shaded by hectares of cropland, winter cereals, maize or irrigated area.
 3. **Union council:** hectares, the deficit in millimetres, a six-dekad chart of crop water use against rainfall, CSV and GeoJSON download, sources and dates.
-4. **Methods and validation:** what each dataset is, how the traffic light is computed, and our cropped-area numbers against the 2024 Agricultural Census, including where they disagree.
+4. **Guide:** a built-in tutorial at `/guide.html` in all three languages that explains the colours, the five steps, the vocabulary and the limits.
+5. **Methods and validation:** what each dataset is, how the traffic light is computed, and our cropped-area numbers against the 2024 Agricultural Census, including where they disagree.
 
 Deficit = actual evapotranspiration (FAO WaPOR v3) − rainfall (NASA POWER), on irrigated winter-cereal land (ESA WorldCereal 2021). Green ≤ 0 mm, amber ≤ 30 mm, red > 30 mm. The reasoning is in [docs/thresholds.md](docs/thresholds.md).
 
@@ -39,7 +40,14 @@ python3 pipeline/validate_data.py
 Without Earth Engine credentials and `pipeline/worldcereal_stats.csv`, evapotranspiration and hectares are clearly flagged placeholders and the site shows a **DEMO DATA** badge. Rainfall and boundaries are real from the first run. See [pipeline/README.md](pipeline/README.md).
 
 ## Deploy
-Push to `main`. `deploy-pages.yml` stages `site/` with `data/` and `docs/` and publishes to GitHub Pages. `update-data.yml` re-runs the pipeline every Monday 03:00 UTC (or on demand) and commits `data: dekad YYYY-MM-DD`.
+
+Both targets build the same folder with `./scripts/build-site.sh`, which copies `data/` and `docs/` next to the pages and regenerates the offline snapshot.
+
+**Render (recommended).** The repository carries a [`render.yaml`](render.yaml) blueprint. In the Render dashboard choose New, then Blueprint, point it at this repository and apply. It creates a free static site with build command `./scripts/build-site.sh` and publish directory `_site`, rebuilds on every push to `main`, and gives pull requests their own preview URL. To add it by hand instead: New, then Static Site, same two settings.
+
+**GitHub Pages.** Settings, then Pages, source GitHub Actions. `deploy-pages.yml` publishes on every push to `main`.
+
+`update-data.yml` re-runs the pipeline every Monday 03:00 UTC, or on demand, and commits `data: dekad YYYY-MM-DD`, which triggers a fresh deploy on both.
 
 ## Data sources and licences
 ESA WorldCereal 2021 (CC BY 4.0) · FAO WaPOR v3 (CC BY 4.0) · NASA POWER (public domain) · geoBoundaries (public domain / CC BY). Details and known weaknesses in [docs/sources.md](docs/sources.md). Code is MIT; data files carry attribution to ESA, FAO and NASA.

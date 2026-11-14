@@ -3,22 +3,44 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Methods and validation · KP Open Farm Atlas</title>
+  <meta name="theme-color" content="#0b3d91">
+  <meta name="description" content="Methods and validation for the KP Open Farm Atlas: the datasets, the water-balance formula, the thresholds, and how the cropland numbers compare with the Agricultural Census.">
+  <title>Methods · KP Open Farm Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="top">
-    <a class="brand" href="./">KP Open Farm Atlas</a>
-    <div class="top-controls"><a class="link" href="./">← Map</a></div>
+    <a class="brand" href="./">
+      <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-satellite"/></svg></span>
+      <span class="brand-text">
+        <b>KP Open Farm Atlas</b>
+        <span>NASA Space Apps Challenge 2026</span>
+      </span>
+    </a>
+    <div class="toolbar">
+      <a class="tool-link" href="guide.html">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-book"/></svg><span>Guide</span>
+      </a>
+      <a class="tool-link ghost" href="./">
+        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-map"/></svg><span>Map</span>
+      </a>
+    </div>
   </header>
-  <main class="doc">
-    <article id="methods"><p class="muted">Loading methods…</p></article>
-    <h2 id="validation-heading">Validation against the 2024 Agricultural Census</h2>
-    <p id="validationNote" class="muted"></p>
-    <div id="scatter"></div>
-    <table id="validationTable"></table>
-    <p class="muted" id="generated"></p>
+  <main class="doc-wrap">
+    <article class="doc">
+      <div id="methods"><p class="muted">Loading methods…</p></div>
+      <h2 id="validation"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Validation against the Agricultural Census</h2>
+      <p id="validationNote" class="muted"></p>
+      <div id="scatter"></div>
+      <div id="validationWrap"><table id="validationTable"></table></div>
+      <p class="muted" id="generated"></p>
+      <p class="muted"><a href="./">← Back to the map</a></p>
+    </article>
   </main>
+  <script src="js/icons.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-basic-2.35.2.min.js"></script>
   <script src="js/methods.js"></script>

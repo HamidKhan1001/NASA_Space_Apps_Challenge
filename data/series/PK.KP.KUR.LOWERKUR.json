@@ -6,67 +6,64 @@
   {
    "start": "2026-09-11",
    "end": "2026-09-20",
-   "et_mm": 40.6,
+   "et_mm": 38.5,
    "rain_mm": 8.6,
-   "deficit_mm": 32.0,
-   "status": "red"
+   "deficit_mm": 29.9,
+   "status": "amber"
   },
   {
    "start": "2026-09-21",
    "end": "2026-09-30",
-   "et_mm": 40.6,
+   "et_mm": 41.6,
    "rain_mm": 13.4,
-   "deficit_mm": 27.2,
+   "deficit_mm": 28.2,
    "status": "amber"
   },
   {
    "start": "2026-10-01",
    "end": "2026-10-10",
-   "et_mm": 31.5,
+   "et_mm": 39.5,
    "rain_mm": 4.0,
-   "deficit_mm": 27.5,
-   "status": "amber"
+   "deficit_mm": 35.5,
+   "status": "red"
   },
   {
    "start": "2026-10-11",
    "end": "2026-10-20",
-   "et_mm": 31.5,
+   "et_mm": 29.5,
    "rain_mm": 11.9,
-   "deficit_mm": 19.6,
+   "deficit_mm": 17.6,
    "status": "amber"
   },
   {
    "start": "2026-10-21",
    "end": "2026-10-31",
-   "et_mm": 34.7,
+   "et_mm": 32.4,
    "rain_mm": 1.4,
-   "deficit_mm": 33.3,
+   "deficit_mm": 31.0,
    "status": "red"
   },
   {
    "start": "2026-11-01",
    "end": "2026-11-10",
-   "et_mm": 25.2,
+   "et_mm": 23.1,
    "rain_mm": 0.3,
-   "deficit_mm": 24.9,
+   "deficit_mm": 22.8,
    "status": "amber"
   }
  ],
  "hectares": {
-  "crop_ha": 45641,
-  "wheat_ha": 27266,
-  "maize_ha": 18001,
-  "irrigated_ha": 31807
+  "crop_ha": 5606,
+  "wheat_ha": null,
+  "maize_ha": null,
+  "irrigated_ha": null
  },
+ "et_method": "fao56_power",
+ "status_basis": "cropland",
  "sources": {
-  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "water_demand": "Reference evapotranspiration (FAO-56 Penman-Monteith) from NASA POWER daily weather",
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
-  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+  "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "source_status": {
-  "et": "synthetic",
-  "rain": "live",
-  "crops": "synthetic"
- },
- "generated_at": "2026-11-14T07:46:45Z"
+ "generated_at": "2026-11-14T08:04:57Z"
 }

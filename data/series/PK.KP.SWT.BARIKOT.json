@@ -6,67 +6,64 @@
   {
    "start": "2026-09-11",
    "end": "2026-09-20",
-   "et_mm": 46.8,
+   "et_mm": 39.6,
    "rain_mm": 33.5,
-   "deficit_mm": 13.3,
+   "deficit_mm": 6.1,
    "status": "amber"
   },
   {
    "start": "2026-09-21",
    "end": "2026-09-30",
-   "et_mm": 46.8,
+   "et_mm": 37.5,
    "rain_mm": 9.3,
-   "deficit_mm": 37.5,
-   "status": "red"
+   "deficit_mm": 28.2,
+   "status": "amber"
   },
   {
    "start": "2026-10-01",
    "end": "2026-10-10",
-   "et_mm": 36.4,
+   "et_mm": 37.0,
    "rain_mm": 5.1,
-   "deficit_mm": 31.3,
+   "deficit_mm": 31.9,
    "status": "red"
   },
   {
    "start": "2026-10-11",
    "end": "2026-10-20",
-   "et_mm": 36.4,
+   "et_mm": 28.3,
    "rain_mm": 12.5,
-   "deficit_mm": 23.9,
+   "deficit_mm": 15.8,
    "status": "amber"
   },
   {
    "start": "2026-10-21",
    "end": "2026-10-31",
-   "et_mm": 40.0,
+   "et_mm": 31.3,
    "rain_mm": 0.1,
-   "deficit_mm": 39.9,
+   "deficit_mm": 31.2,
    "status": "red"
   },
   {
    "start": "2026-11-01",
    "end": "2026-11-10",
-   "et_mm": 29.1,
+   "et_mm": 22.4,
    "rain_mm": 0.3,
-   "deficit_mm": 28.8,
+   "deficit_mm": 22.1,
    "status": "amber"
   }
  ],
  "hectares": {
-  "crop_ha": 10692,
-  "wheat_ha": 7422,
-  "maize_ha": 3984,
-  "irrigated_ha": 8172
+  "crop_ha": 6311,
+  "wheat_ha": null,
+  "maize_ha": null,
+  "irrigated_ha": null
  },
+ "et_method": "fao56_power",
+ "status_basis": "cropland",
  "sources": {
-  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "water_demand": "Reference evapotranspiration (FAO-56 Penman-Monteith) from NASA POWER daily weather",
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
-  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+  "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "source_status": {
-  "et": "synthetic",
-  "rain": "live",
-  "crops": "synthetic"
- },
- "generated_at": "2026-11-14T07:46:45Z"
+ "generated_at": "2026-11-14T08:04:57Z"
 }

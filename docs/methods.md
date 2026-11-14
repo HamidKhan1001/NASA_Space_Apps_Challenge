@@ -1,58 +1,65 @@
 # Methods and validation
 
-The KP Open Farm Atlas answers one question for every union council (tehsil) in Khyber Pakhtunkhwa: **over the last ten days, did the crops lose more water than they received?** It also shows how much land is cropped, how much of it is winter cereals or maize, and how much is irrigated.
+The KP Open Farm Atlas answers one question for every union council in Khyber Pakhtunkhwa: **over the last ten days, did the crops get as much water as they needed?** It also shows how much land in each unit is cropped.
 
-It is a public, static website. The numbers are recomputed every Monday by a GitHub Action and committed to the repository, so every value on the map can be traced to a file, a date and a source.
+It is a public, static website. Every number is recomputed each week by a scheduled job and committed to the repository, so any value on the map can be traced back to a file, a date and a source. Nothing on the map is estimated by hand: when a source is not connected, the field is shown as unavailable rather than filled in.
 
 ## What each dataset is
 
-**ESA WorldCereal 2021** is a global 10 m crop map produced by ESA from Sentinel-1 and Sentinel-2. We use four of its products: temporary crops (annual cropland), winter cereals, maize, and active irrigation. It describes the 2021 season. Cropland extent is stable over a few years; crop type is not, so the atlas says "winter cereals in 2021", not "wheat this year". WorldCereal is known to under-detect terraced and very small fields, which matters in Dir, Chitral and Kohistan.
+**NASA POWER** supplies the weather. For every unit centroid we request daily bias-corrected precipitation (`PRECTOTCORR`) together with maximum and minimum temperature, relative humidity, wind speed, downward shortwave radiation and surface pressure, from the MERRA-2 reanalysis on a 0.5° by 0.625° grid. It is free, needs no key, and updates within a few days. Being a reanalysis, it represents regional weather well and single local storms poorly.
 
-**FAO WaPOR v3** provides actual evapotranspiration and interception (AETI) every ten days at 100 m (Level 2) and 300 m (Level 1), derived from satellite thermal and optical data with a surface-energy-balance model. It is the water the crop and soil actually lost, including irrigation that was applied. Irrigation therefore raises ET; it does not hide it.
+**Water demand** is computed from those same NASA variables with the FAO-56 Penman-Monteith equation for reference evapotranspiration, the international standard for crop water requirements (Allen and others, FAO Irrigation and Drainage Paper 56, 1998). It is the depth of water a short, well-watered reference crop would use in the period. For Peshawar in November this comes to roughly 2.2 mm per day, and in June to roughly 7 mm per day, which matches the published agronomy for the valley.
 
-**NASA POWER** provides daily bias-corrected precipitation (PRECTOTCORR) from the MERRA-2 reanalysis on a half-degree grid. We sum the daily values into the same dekads as WaPOR at each unit's centroid. It is coarse, but free, keyless and updated within a few days.
+**FAO WaPOR v3** provides actual evapotranspiration measured from space, every ten days at 100 m or 300 m. It is the better input because it reflects the water a real crop lost, including irrigation that was applied. The pipeline uses it automatically whenever Earth Engine credentials are present, and falls back to the FAO-56 calculation otherwise. Each generated file records which of the two produced it, and the site shows this on every panel.
 
-**geoBoundaries** supplies the district (ADM2) and tehsil (ADM3) polygons, simplified for fast loading on a phone.
+**ESA WorldCover 2021** gives the cropland mask: a global 10 m land-cover map built from Sentinel-1 and Sentinel-2, of which we use class 40, cropland. It is read directly from the public cloud-optimised rasters at about 75 m, which keeps the area error for units of this size to a couple of percent.
+
+**ESA WorldCereal 2021** would separate winter cereals, maize and irrigated land. It is distributed through Google Earth Engine, so it needs credentials this public build does not have. Those three figures are therefore reported as not connected, and the water-balance signal is computed over all mapped cropland instead of over irrigated winter cereals alone.
+
+**geoBoundaries** supplies the boundaries, simplified for fast loading on a phone.
 
 ## How the traffic light is computed
 
-For each unit and each dekad:
+For each unit and each ten-day period:
 
 ```
-deficit_mm = ET_mm (WaPOR, unit mean) − rain_mm (POWER, dekad sum)
+deficit_mm = water needed (mm) − rainfall (mm)
 ```
 
 | Class | Rule |
 |---|---|
-| green | deficit ≤ 0 mm: rain covered crop water use |
-| amber | 0 < deficit ≤ 30 mm: one irrigation turn covers it |
-| red | deficit > 30 mm: stress likely if canal water is late |
-| nodata | no irrigated winter cereals mapped, or a source was missing |
+| green | deficit of 0 mm or less: rain covered what the crops needed |
+| amber | deficit of 1 to 30 mm: one irrigation turn covers it |
+| red | deficit above 30 mm: more than one irrigation turn is missing |
+| nodata | no cropland mapped, or a source missing for the period |
 
-The 30 mm boundary comes from wheat water use in the Peshawar valley in November to December (3 to 4 mm/day, so 30 to 40 mm per dekad) and from what one canal irrigation turn delivers to the root zone (about 30 mm). The reasoning is in `docs/thresholds.md`; the values are stored once in `data/meta.json` and the website reads them from there.
+The 30 mm boundary comes from the irrigation practice of the region rather than from the satellite: a canal turn here applies roughly 75 mm at the outlet, of which about 30 mm reaches the root zone at typical field efficiency. The threshold values live in `data/meta.json` and the website reads them from there, so changing the rule never means changing the site. The reasoning is set out in `docs/thresholds.md`.
 
 ## What this cannot tell you
 
-- **Nothing about a single farm.** One ET pixel covers several 2-acre farms. The atlas says "this union council, as a whole, lost more water than it received". It never says "your field is dry".
-- **Nothing about the future.** Every number is the last ten days. There is no forecast.
-- **Nothing about yield, food security, groundwater or salinity.** Those are phase-2 and phase-3 layers listed in CONTRIBUTING.
-- **Crop type is from 2021.** Fields that switched between wheat and another crop since then are misclassified.
-- **Rainfall is a half-degree reanalysis.** Local storms can be missed or smeared across neighbouring units.
+- **Nothing about a single farm.** One weather or evapotranspiration pixel covers several two-acre farms. The Atlas says "this union council, as a whole, needed more water than it received". It never says "your field is dry".
+- **Nothing about the future.** Every number describes the last ten days. There is no forecast.
+- **Nothing about yield, food security, groundwater or soil salinity.**
+- **Crop extent is from 2021.** Land that has come into or gone out of cultivation since then is described by the 2021 map.
+- **Rainfall is a coarse reanalysis.** A convective storm over one union council can be smoothed across its neighbours.
 
 ## Validation
 
-We compare our per-district cropped area and winter-cereal area against the district tables of the **2024 Agricultural Census** (Pakistan Bureau of Statistics). The scatter below shows census on the x-axis, atlas on the y-axis, one dot per district, with the 1:1 line and the Pearson correlation. The three districts with the largest disagreement are named. We expect mountain districts to disagree most, because WorldCereal struggles with terraces and small plots, and we say so rather than hide it.
+We compare the per-district cropland area against the district tables of the Agricultural Census. The chart below puts the census on the horizontal axis and this atlas on the vertical, one dot per district, with the 1:1 line and the Pearson correlation, and names the three districts that disagree most.
 
-Census figures are reported per season in acres; we convert to hectares (× 0.4047) and compare Rabi cropped area with WorldCereal winter cereals, which is the like-for-like pair.
+The province total from ESA WorldCover is about 1.38 million hectares of cropland against a published cropped area in the region of 1.6 to 1.9 million hectares. The gap is expected and is itself informative: the satellite under-detects terraced and very small plots, which is why Kohistan and Shangla come out near zero percent cropped while Dera Ismail Khan and Swabi come out near half. Those are the districts to treat with caution, and they are named rather than hidden.
+
+The census column is typed by hand from the published tables into `pipeline/census_2024.csv`; the chart appears as soon as at least three districts are filled in.
 
 ## Reproducing the numbers
 
 ```
 pip install -r pipeline/requirements.txt
 python3 pipeline/prepare_boundaries.py     # boundaries from geoBoundaries
-python3 pipeline/fetch_power.py            # NASA POWER rainfall, cached to disk
-python3 pipeline/build_series.py           # WaPOR via Earth Engine if available, then /data
+python3 pipeline/fetch_power.py --days 80  # NASA POWER weather, cached on disk
+python3 pipeline/worldcover_stats.py       # cropland hectares from ESA WorldCover
+python3 pipeline/build_series.py           # water balance and every /data file
 python3 pipeline/validate_data.py          # contract check
 ```
 
-Hectares come from `pipeline/worldcereal_stats.js`, run once in the Earth Engine Code Editor, exported to `pipeline/worldcereal_stats.csv`. Until that file and Earth Engine credentials are present, the pipeline writes clearly flagged placeholder values and the site shows a DEMO badge.
+Only the crop-type statistics need an account: run `pipeline/worldcereal_stats.js` once in the Earth Engine Code Editor, save the export as `pipeline/worldcereal_stats.csv`, and the winter cereals, maize and irrigated columns light up by themselves on the next build.

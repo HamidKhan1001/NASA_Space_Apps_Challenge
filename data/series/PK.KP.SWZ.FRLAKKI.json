@@ -6,67 +6,64 @@
   {
    "start": "2026-09-11",
    "end": "2026-09-20",
-   "et_mm": 43.9,
+   "et_mm": 51.7,
    "rain_mm": 3.3,
-   "deficit_mm": 40.6,
+   "deficit_mm": 48.4,
    "status": "red"
   },
   {
    "start": "2026-09-21",
    "end": "2026-09-30",
-   "et_mm": 43.9,
+   "et_mm": 49.9,
    "rain_mm": 33.4,
-   "deficit_mm": 10.5,
+   "deficit_mm": 16.5,
    "status": "amber"
   },
   {
    "start": "2026-10-01",
    "end": "2026-10-10",
-   "et_mm": 34.2,
+   "et_mm": 47.2,
    "rain_mm": 2.6,
-   "deficit_mm": 31.6,
+   "deficit_mm": 44.6,
    "status": "red"
   },
   {
    "start": "2026-10-11",
    "end": "2026-10-20",
-   "et_mm": 34.2,
+   "et_mm": 35.4,
    "rain_mm": 13.9,
-   "deficit_mm": 20.3,
+   "deficit_mm": 21.5,
    "status": "amber"
   },
   {
    "start": "2026-10-21",
    "end": "2026-10-31",
-   "et_mm": 37.6,
+   "et_mm": 39.2,
    "rain_mm": 2.0,
-   "deficit_mm": 35.6,
+   "deficit_mm": 37.2,
    "status": "red"
   },
   {
    "start": "2026-11-01",
    "end": "2026-11-10",
-   "et_mm": 27.3,
+   "et_mm": 28.9,
    "rain_mm": 0.0,
-   "deficit_mm": 27.3,
+   "deficit_mm": 28.9,
    "status": "amber"
   }
  ],
  "hectares": {
-  "crop_ha": 6856,
-  "wheat_ha": 4032,
-  "maize_ha": 2408,
-  "irrigated_ha": 6213
+  "crop_ha": 239,
+  "wheat_ha": null,
+  "maize_ha": null,
+  "irrigated_ha": null
  },
+ "et_method": "fao56_power",
+ "status_basis": "cropland",
  "sources": {
-  "et": "FAO WaPOR v3 actual evapotranspiration and interception, dekadal (AETI-D)",
+  "water_demand": "Reference evapotranspiration (FAO-56 Penman-Monteith) from NASA POWER daily weather",
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
-  "crops": "ESA WorldCereal 2021 v100: temporary crops, winter cereals, maize, active irrigation"
+  "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "source_status": {
-  "et": "synthetic",
-  "rain": "live",
-  "crops": "synthetic"
- },
- "generated_at": "2026-11-14T07:46:45Z"
+ "generated_at": "2026-11-14T08:04:57Z"
 }

@@ -14,3 +14,4 @@ site/data
 
 .DS_Store
 site/js/data-snapshot.js
+_site/
