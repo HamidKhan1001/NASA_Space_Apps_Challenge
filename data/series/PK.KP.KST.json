@@ -60,9 +60,9 @@
   {
    "start": "2026-11-01",
    "end": "2026-11-10",
-   "et_mm": 11.6,
+   "et_mm": 12.6,
    "rain_mm": 7.0,
-   "deficit_mm": 4.6,
+   "deficit_mm": 5.6,
    "status": "amber",
    "pct": 44,
    "normal_mm": 9.0,
@@ -82,5 +82,5 @@
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
   "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "generated_at": "2026-11-15T14:26:52Z"
+ "generated_at": "2026-11-16T10:16:45Z"
 }

@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T14:26:52Z",
+ "generated_at": "2026-11-16T10:16:45Z",
  "mode": "live",
  "et_method": "fao56_power",
  "status_basis": "irrigated winter cereals",
@@ -101,8 +101,8 @@
   "level3_units": 122,
   "district_status": {
    "green": 1,
-   "amber": 25,
-   "red": 2,
+   "amber": 22,
+   "red": 5,
    "nodata": 3
   },
   "units_without_weather": 0
