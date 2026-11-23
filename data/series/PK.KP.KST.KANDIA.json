@@ -4,17 +4,6 @@
  "district_id": "PK.KP.KST",
  "dekads": [
   {
-   "start": "2026-09-11",
-   "end": "2026-09-20",
-   "et_mm": 29.1,
-   "rain_mm": 18.6,
-   "deficit_mm": 10.5,
-   "status": "amber",
-   "pct": 8,
-   "normal_mm": 28.1,
-   "baseline_years": 25
-  },
-  {
    "start": "2026-09-21",
    "end": "2026-09-30",
    "et_mm": 28.2,
@@ -68,6 +57,17 @@
    "pct": 44,
    "normal_mm": 8.9,
    "baseline_years": 25
+  },
+  {
+   "start": "2026-11-11",
+   "end": "2026-11-20",
+   "et_mm": null,
+   "rain_mm": 53.0,
+   "deficit_mm": null,
+   "status": "nodata",
+   "pct": null,
+   "normal_mm": null,
+   "baseline_years": null
   }
  ],
  "hectares": {
@@ -83,5 +83,5 @@
   "rain": "NASA POWER daily bias-corrected precipitation (PRECTOTCORR, MERRA-2)",
   "cropland": "ESA WorldCover 2021 v200, class 40 cropland, 10 m"
  },
- "generated_at": "2026-11-16T10:16:45Z"
+ "generated_at": "2026-11-23T11:25:56Z"
 }

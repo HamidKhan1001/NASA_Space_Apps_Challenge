@@ -1,17 +1,13 @@
 {
- "generated_at": "2026-11-16T10:16:45Z",
+ "generated_at": "2026-11-23T11:25:56Z",
  "mode": "live",
  "et_method": "fao56_power",
  "status_basis": "irrigated winter cereals",
  "latest_dekad": {
-  "start": "2026-11-01",
-  "end": "2026-11-10"
+  "start": "2026-11-11",
+  "end": "2026-11-20"
  },
  "dekads": [
-  {
-   "start": "2026-09-11",
-   "end": "2026-09-20"
-  },
   {
    "start": "2026-09-21",
    "end": "2026-09-30"
@@ -31,6 +27,10 @@
   {
    "start": "2026-11-01",
    "end": "2026-11-10"
+  },
+  {
+   "start": "2026-11-11",
+   "end": "2026-11-20"
   }
  ],
  "thresholds": {
@@ -100,10 +100,10 @@
   "districts": 31,
   "level3_units": 122,
   "district_status": {
-   "green": 1,
-   "amber": 22,
-   "red": 5,
-   "nodata": 3
+   "green": 0,
+   "amber": 0,
+   "red": 0,
+   "nodata": 31
   },
   "units_without_weather": 0
  },
