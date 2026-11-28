@@ -821,6 +821,7 @@
     if (!plotlyPromise) plotlyPromise = new Promise(function (resolve, reject) {
       var s = document.createElement('script');
       s.src = cfg.plotlyUrl;
+      s.integrity = cfg.plotlyIntegrity; s.crossOrigin = 'anonymous';
       s.onload = resolve; s.onerror = reject;
       document.head.appendChild(s);
     });

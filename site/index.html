@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net https://cdn.plot.ly; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://server.arcgisonline.com https://unpkg.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b3d91">
   <meta name="description" content="KP Open Farm Atlas: where crops grow in Khyber Pakhtunkhwa and whether each union council's crops got enough water in the last ten days, from NASA and ESA open data.">
@@ -96,6 +98,9 @@
   <script src="js/utils.js"></script>
   <script src="js/services/state.js"></script>
   <script src="js/services/i18n.js"></script>
+  <script src="js/services/errors.js"></script>
+  <script src="js/services/http.js"></script>
+  <script src="js/services/schema.js"></script>
   <script src="js/services/data-service.js"></script>
   <script src="js/services/csv.js"></script>
   <script src="js/services/motion.js"></script>

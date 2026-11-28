@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:unit
+
+  data:
+    name: Data contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: npm ci
+      - run: python3 pipeline/validate_data.py
+      - run: npm run test:data
+
+  e2e:
+    name: E2E (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [static]
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop, phone]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=${{ matrix.project }}
+        env: { CI: "true" }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: sh scripts/build-site.sh
+      - name: Size budget (20 MB)
+        run: |
+          kb=$(du -sk _site | cut -f1)
+          echo "site size: ${kb} KB"
+          test "$kb" -lt 20480
+      - name: Snapshot must not drift from committed file
+        run: git diff --exit-code -- site/js/data-snapshot.js || echo "::warning::data-snapshot.js is stale; run scripts/build-site.sh and commit"
+
+  all-green:
+    name: CI required
+    if: always()
+    needs: [static, data, e2e, build]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          test "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "false"

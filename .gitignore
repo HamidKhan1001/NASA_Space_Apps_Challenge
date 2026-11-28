@@ -16,3 +16,8 @@ site/data
 
 .DS_Store
 _site/
+
+# dev tooling
+node_modules/
+playwright-report/
+test-results/

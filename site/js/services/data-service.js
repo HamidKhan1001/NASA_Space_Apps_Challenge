@@ -48,9 +48,12 @@ Atlas.data = (function () {
     });
   }
 
+  // One shared client: rate budget, retries and timeouts apply to every request.
+  var http = Atlas.http.createClient();
+
   function fetchFrom(base, path, bust) {
-    return fetch(base + path + '?v=' + (bust || version()), { cache: 'no-cache' })
-      .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + path); return r.json(); });
+    if (!Atlas.http.isSafePath(path)) return Promise.reject(new Error('Refused unsafe data path'));
+    return http.getJSON(base + path + '?v=' + (bust || version()), { cache: 'no-cache' });
   }
 
   // Path relative to the data root (e.g. 'meta.json', 'series/PK.KP.CHA.json').
@@ -74,25 +77,29 @@ Atlas.data = (function () {
   // Path relative to the site root (e.g. 'strings.json').
   function getText(path, bust) {
     if (window.ATLAS_SNAPSHOT) return fromSnapshot(path);
-    return fetch(path + '?v=' + (bust || version()))
-      .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + path); return r.json(); })
+    if (!Atlas.http.isSafePath(path)) return Promise.reject(new Error('Refused unsafe path'));
+    return http.getJSON(path + '?v=' + (bust || version()))
       .catch(function (err) { return fromSnapshot(path).catch(function () { throw err; }); });
   }
 
   // ---- Domain accessors ---------------------------------------------------
   function series(id) {
-    if (!seriesCache[id]) seriesCache[id] = getJSON('series/' + id + '.json').catch(function () { return null; });
+    if (!Atlas.http.isSafeId(id)) return Promise.resolve(null);
+    if (!seriesCache[id]) seriesCache[id] = getJSON('series/' + id + '.json').then(Atlas.schema.series).catch(function () { return null; });
     return seriesCache[id];
   }
 
   function loadUCs(districtId) {
+    if (!Atlas.http.isSafeId(districtId)) return Promise.resolve({ type: 'FeatureCollection', features: [] });
     if (!ucCache[districtId]) ucCache[districtId] = getJSON('ucs/' + districtId + '.geojson')
+      .then(function (fc) { return Atlas.schema.featureCollection(fc, 'ucs/' + districtId); })
       .catch(function () { return { type: 'FeatureCollection', features: [] }; });
     return ucCache[districtId];
   }
 
   function loadAllUCs() {
     if (!allUCsPromise) allUCsPromise = getJSON('ucs/all.geojson')
+      .then(function (fc) { return Atlas.schema.featureCollection(fc, 'ucs/all'); })
       .catch(function () { return { type: 'FeatureCollection', features: [] }; });
     return allUCsPromise;
   }

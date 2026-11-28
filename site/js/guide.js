@@ -143,6 +143,8 @@
     });
     render();
   }).catch(function (err) {
-    document.getElementById('doc').innerHTML = '<h1>Guide unavailable</h1><p class="muted">' + err.message + '</p>';
+    var d = document.getElementById('doc');
+    d.innerHTML = '<h1>Guide unavailable</h1><p class="muted"></p>';
+    d.querySelector('p').textContent = err.message;
   });
 })();

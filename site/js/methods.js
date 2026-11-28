@@ -2,17 +2,20 @@
 (function () {
   'use strict';
   var v = Math.floor(Date.now() / 3.6e6);
+  var http = Atlas.http.createClient();
+  function esc(x) {
+    return String(x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
 
-  fetch('docs/methods.md?v=' + v)
-    .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error(r.status)); })
-    .then(function (md) { document.getElementById('methods').innerHTML = marked.parse(md); })
+  http.getText('docs/methods.md?v=' + v)
+    .then(function (md) { document.getElementById('methods').innerHTML = Atlas.sanitize.html(marked.parse(md)); })
     .catch(function () {
       document.getElementById('methods').innerHTML =
         '<h1>Methods</h1><p class="muted">docs/methods.md was not found next to this page. ' +
         'Serve the site with scripts/serve.sh, or read it in the repository.</p>';
     });
 
-  fetch('data/meta.json?v=' + v).then(function (r) { return r.json(); }).then(function (meta) {
+  http.getJSON('data/meta.json?v=' + v).then(function (meta) {
     var method = meta.et_method === 'wapor_aeti'
       ? 'FAO WaPOR actual evapotranspiration'
       : 'FAO-56 Penman-Monteith from NASA POWER';
@@ -44,7 +47,7 @@
   }
   function num(x) { return x === '' || x == null ? '' : Number(x).toLocaleString('en-US'); }
 
-  fetch('data/validation.csv?v=' + v).then(function (r) { return r.text(); }).then(function (text) {
+  http.getText('data/validation.csv?v=' + v).then(function (text) {
     var rows = parseCSV(text);
     var pairs = rows.filter(function (r) { return r.census_crop_ha && r.atlas_crop_ha; });
     var note = document.getElementById('validationNote');
@@ -53,7 +56,7 @@
       '<th>Ratio</th></tr>' + rows.map(function (r) {
         var ratio = r.census_crop_ha && r.atlas_crop_ha
           ? (Number(r.atlas_crop_ha) / Number(r.census_crop_ha)).toFixed(2) : '';
-        return '<tr><td>' + r.district + '</td><td>' +
+        return '<tr><td>' + esc(r.district) + '</td><td>' +
           (r.census_crop_ha ? num(r.census_crop_ha) : '<span class="muted">not entered</span>') +
           '</td><td>' + num(r.atlas_crop_ha) + '</td><td>' + ratio + '</td></tr>';
       }).join('');
