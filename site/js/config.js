@@ -11,6 +11,7 @@ Atlas.config = {
   stringsUrl: 'strings.json',
   snapshotUrl: 'js/data-snapshot.js',
   plotlyUrl: 'https://cdn.plot.ly/plotly-basic-2.35.2.min.js',
+  plotlyIntegrity: 'sha384-wQ3lfCxuvLfhHGiSdHF5+e3NZ1zNwEMd8/nII+K7VKChF9llO/OwOcn/aVRkB7az',
 
   // Semantic status colours (mirror --green/--amber/--red/--nodata in tokens.css).
   colors: { green: '#15803d', amber: '#d97706', red: '#c2250f', nodata: '#94a3b8' },
